@@ -3,3 +3,4 @@ biopython
 wtforms
 werkzeug
 flask_wtf
+werkzeug
