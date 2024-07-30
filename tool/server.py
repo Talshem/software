@@ -8,10 +8,11 @@ from flask_wtf import FlaskForm, CSRFProtect
 from werkzeug.utils import secure_filename
 from wtforms import StringField, BooleanField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Email, Length
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, current_app
 from flask_wtf.file import FileField
-from server_utils import generic_process_file
 from wtforms import StringField, TextAreaField, SubmitField
+from werkzeug.utils import secure_filename
+import re
 
 
 # Initialize the Flask app
@@ -102,3 +103,41 @@ def internal_error(e):
 if __name__ == '__main__' :
 
     app.run(debug=True, port=3000)
+
+
+# TODO: generic_process_file function, implement with biopython ? consider run time and memory usage.
+def generic_process_file(uploaded_file):
+    # create dictionary to store faste date from file
+    fasta_dict = {}
+    if uploaded_file:
+        filename = secure_filename(uploaded_file.filename)
+        file_ext = os.path.splitext(filename)[1]
+        if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
+            abort(400)
+        else:
+            header = ''
+            for line in uploaded_file:
+                try:
+                    line = line.decode('utf-8').strip()
+                    if line.startswith('>'):
+                        header = line
+                        fasta_dict[header] = ''
+                        continue
+                    else:
+                        line = line.upper()
+                        if validate_sequence(line):
+                            fasta_dict[header] += line.strip().upper()
+                except ValueError as e:
+                    return str(e)
+
+            if not fasta_dict:
+                return None
+    return fasta_dict
+
+
+
+def validate_sequence(sequence):
+    if not re.search(r"^[ACGT]", sequence):
+        raise ValueError("Invalid sequence: must contain only A, C, G, or T nucleotides.")
+
+    return sequence
