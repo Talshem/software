@@ -1,6 +1,5 @@
 flask
 biopython
 wtforms
-server_utils
 werkzeug
 flask_wtf
