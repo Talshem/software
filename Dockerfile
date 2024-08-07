@@ -1,33 +1,34 @@
-# Use a base image with necessary build tools
-FROM ubuntu:20.04
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
 
-# Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive
+# Set the working directory in the container
+WORKDIR /app
 
-# Install required packages
+# Copy the requirements.txt file into the container at /app
+COPY requirements.txt /app/
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install dependencies for NUPACK
 RUN apt-get update && \
-    apt-get install -y build-essential gfortran wget python3 python3-pip
+    apt-get install -y build-essential cmake wget
 
-# Download and check the NUPACK file
-RUN wget https://www.nupack.org/download/nupack-4.0.tar.gz -O /tmp/nupack-4.0.tar.gz && \
-    file /tmp/nupack-4.0.tar.gz && \
-    tar -xzf /tmp/nupack-4.0.tar.gz -C /tmp && \
-    cd /tmp/nupack-4.0 && \
-    ./configure && \
-    make && \
-    make install && \
-    cd /tmp && \
-    rm -rf nupack-4.0 nupack-4.0.tar.gz
+# Download and install NUPACK
+RUN wget https://github.com/Caltech-NUPACK/nupack/releases/download/4.0.0.27/nupack-4.0.0.27-linux64.tar.gz && \
+    tar -xvzf nupack-4.0.0.27-linux64.tar.gz && \
+    mv nupack-4.0.0.27 /opt/nupack && \
+    rm nupack-4.0.0.27-linux64.tar.gz
 
-# Set the working directory
-WORKDIR /tool
+# Set NUPACK environment variables
+ENV PATH="/opt/nupack/bin:$PATH"
+ENV NUPACKHOME="/opt/nupack"
 
-# Copy server code and requirements.txt
-COPY tool/server.py .
-COPY requirements.txt .
+# Copy the rest of the application code to /app
+COPY . /app
 
-# Install Python dependencies
-RUN pip3 install --no-cache-dir -r requirements.txt
+# Make port 8080 available to the world outside this container
+EXPOSE 8080
 
-# Set the command to run your server
-CMD ["python3", "server.py"]
+# Run tool/server.py when the container launches
+CMD ["python", "tool/server.py"]
