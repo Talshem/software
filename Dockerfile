@@ -4,17 +4,19 @@ FROM ubuntu:20.04
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install required packages and NUPACK
+# Install required packages
 RUN apt-get update && \
-    apt-get install -y build-essential gfortran wget python3 python3-pip && \
-    wget https://www.nupack.org/download/nupack-4.0.tar.gz && \
-    tar -xzf nupack-4.0.tar.gz && \
+    apt-get install -y build-essential gfortran wget python3 python3-pip
+
+# Download and extract the file (assuming a different format or URL)
+RUN wget https://www.nupack.org/download/nupack-4.0.tar && \
+    tar -xf nupack-4.0.tar && \
     cd nupack-4.0 && \
     ./configure && \
     make && \
     make install && \
     cd .. && \
-    rm -rf nupack-4.0 nupack-4.0.tar.gz
+    rm -rf nupack-4.0 nupack-4.0.tar
 
 # Set the working directory
 WORKDIR /tool
