@@ -8,13 +8,14 @@ from flask_wtf import FlaskForm, CSRFProtect
 from werkzeug.utils import secure_filename
 from wtforms import StringField, BooleanField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Email, Length
-from flask import Flask, render_template, request, redirect, url_for, flash, abort, current_app
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, current_app, jsonify
 from flask_wtf.file import FileField
 from wtforms import StringField, TextAreaField, SubmitField
 from werkzeug.utils import secure_filename
 import re
 from window_folding_based_selection import get_potential_windows_scores
 from switch_generator import SwitchGenerator
+from google.cloud import storage
 
 
 # Initialize the Flask app
@@ -23,6 +24,11 @@ app.config['SECRET_KEY'] = 'taltal'
 csrf = CSRFProtect(app)  # Initialize CSRF protection
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 app.config['UPLOAD_EXTENSIONS'] = ['.fasta']
+
+client = storage.Client()
+bucket_name = 'spry-ivy-431810-v0.appspot.com'
+bucket = client.get_bucket(bucket_name)
+blobs = bucket.list_blobs()
 
 class InputForm(FlaskForm):
     # todo: add validators to email?
@@ -68,7 +74,7 @@ def user_data_getter():
             # Process the file
             data_dict = generic_process_file(uploaded_file)
 
-            result = subprocess.run(['python', 'generate_switch.py', trigger, reporter_gene],
+            result = subprocess.run(['python', 'generate_switch.py', cell_type, trigger, reporter_gene],
             capture_output=True,
             text=True
             )
@@ -141,10 +147,12 @@ def generic_process_file(uploaded_file):
                 return None
     return fasta_dict
 
-def generate_switch(trigger, reporter_gene):
+def generate_switch(cell_type, trigger, reporter_gene):
+    # blob = bucket.blob(cell_type)
+    # content = blob.download_as_text()
     optional_triggers = get_potential_windows_scores(trigger)
     optimal_trigger = max(optional_triggers, key=optional_triggers.get)
-    switch_generator = SwitchGenerator(reporter_gene)
+    switch_generator = SwitchGenerator(reporter_gene, cell_type)
     switch = switch_generator.get_switch(optimal_trigger)          
     # send_email(email, "Results", f"Your switch is: {switch}")
     return switch
