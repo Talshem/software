@@ -35,9 +35,6 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
 # Set environment variables for Conda
 ENV PATH /opt/miniconda/bin:$PATH
 
-# Install Python packages via Conda
-RUN conda install -y numpy scipy pip matplotlib pandas jupyterlab
-
 # Copy NUPACK zip file to the container
 COPY nupack-VERSION.zip ./
 
