@@ -10,8 +10,6 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from tqdm import tqdm
 
-MRNAS_FOLDER = "/tamir2/lab_resources/Genomes/Human/human_hg38/Ensembl_109_gene_annotations"
-CHROMOSOMES_FOLDER = '/tamir2/cancer_proj/human_hg38/Chromosome'
 RNAUP_BINARY_NAME = "/tamir2/peba/miniconda/bin/RNAup"
 WINDOW_SIZE = 23
 CONTEXT_WINDOW_SIZE = 50
