@@ -36,10 +36,11 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
 ENV PATH /opt/miniconda/bin:$PATH
 
 # Copy NUPACK zip file to the container
-COPY nupack-4.0.1.7.zip ./
+COPY nupack-4.0.1.7.zip /app/
 
 # Unzip and install NUPACK
-RUN unzip nupack-4.0.1.7.zip && \
+RUN cd /app && \
+    unzip nupack-4.0.1.7.zip && \
     cd nupack-4.0.1.7 && \
     pip install -U nupack -f ./package
 
