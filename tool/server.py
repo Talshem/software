@@ -14,6 +14,8 @@ from wtforms import StringField, TextAreaField, SubmitField
 from werkzeug.utils import secure_filename
 import re
 from window_folding_based_selection import get_potential_windows_scores
+from switch_generator import SwitchGenerator
+
 
 # Initialize the Flask app
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -76,8 +78,13 @@ def user_data_getter():
 
             # send_email(email, "Form Submission Received", "Your form has been received and is being processed.")
 
-            optimal_triggers = get_potential_windows_scores(trigger)
+            optional_triggers = get_potential_windows_scores(trigger)
+            optimal_trigger = max(optional_triggers, key=optional_triggers.get)
+            switch_generator  = SwitchGenerator(reporter_gene)
+            switch = switch_generator.get_switch(optimal_trigger)
 
+            # send_email(email, "Results", f"Your switch is: {switch}")
+            
             # Process the file
             # Clear the form
             input_form.gene.data = ''
