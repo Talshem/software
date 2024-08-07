@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "tool/server.py",
-      "use": "@vercel/python"
+      "src": "Dockerfile",
+      "use": "@vercel/docker"
     }
   ],
   "routes": [
     {
       "src": "/.*",
-      "dest": "tool/server.py"
+      "dest": "/tool/server.py"
     }
   ]
 }
