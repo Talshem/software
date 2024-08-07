@@ -5,5 +5,4 @@ werkzeug
 flask_wtf
 werkzeug
 google-cloud-storage
-rnaup
-nupack
+viennarna
