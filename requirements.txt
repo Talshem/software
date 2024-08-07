@@ -4,5 +4,3 @@ wtforms
 werkzeug
 flask_wtf
 werkzeug
-pandas
-viennarna
