@@ -15,7 +15,7 @@ RUN apt-get update && \
     apt-get install -y build-essential cmake wget
 
 # Download and install NUPACK
-RUN wget https://github.com/Caltech-NUPACK/nupack/releases/download/4.0.0.27/nupack-4.0.0.27-linux64.tar.gz -O nupack.tar.gz && \
+RUN curl -L https://github.com/Caltech-NUPACK/nupack/releases/download/4.0.0.27/nupack-4.0.0.27-linux64.tar.gz -o nupack.tar.gz && \
     ls -l && \
     tar -xvzf nupack.tar.gz && \
     ls -l && \
