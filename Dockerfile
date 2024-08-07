@@ -15,10 +15,12 @@ RUN apt-get update && \
     apt-get install -y build-essential cmake wget
 
 # Download and install NUPACK
-RUN wget https://github.com/Caltech-NUPACK/nupack/releases/download/4.0.0.27/nupack-4.0.0.27-linux64.tar.gz && \
-    tar -xvzf nupack-4.0.0.27-linux64.tar.gz && \
+RUN wget https://github.com/Caltech-NUPACK/nupack/releases/download/4.0.0.27/nupack-4.0.0.27-linux64.tar.gz -O nupack.tar.gz && \
+    ls -l && \
+    tar -xvzf nupack.tar.gz && \
+    ls -l && \
     mv nupack-4.0.0.27 /opt/nupack && \
-    rm nupack-4.0.0.27-linux64.tar.gz
+    rm nupack.tar.gz
 
 # Set NUPACK environment variables
 ENV PATH="/opt/nupack/bin:$PATH"
