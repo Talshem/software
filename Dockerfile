@@ -1,10 +1,7 @@
-# Use a base image with necessary build tools
 FROM ubuntu:20.04
 
-# Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install required packages and NUPACK
 RUN apt-get update && \
     apt-get install -y build-essential gfortran wget && \
     wget https://www.nupack.org/download/nupack-4.0.tar.gz && \
@@ -14,11 +11,10 @@ RUN apt-get update && \
     make && \
     make install
 
-# Copy your server code
-COPY tool/server.py
+COPY tool/server.py .
+COPY requirements.txt .
 
-# Set the working directory
-WORKDIR /tool
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Set the command to run your server
 CMD ["python3", "server.py"]
