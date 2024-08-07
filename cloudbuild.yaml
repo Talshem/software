@@ -1,0 +1,7 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/spry-ivy-431810-v0/protech', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/spry-ivy-431810-v0/protech']
+images:
+  - 'gcr.io/spry-ivy-431810-v0/protech'
