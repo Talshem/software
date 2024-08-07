@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Install dependencies for NUPACK
 RUN apt-get update && \
-    apt-get install -y build-essential cmake wget
+    apt-get install -y build-essential cmake wget curl
 
 # Download and install NUPACK
 RUN curl -L https://github.com/Caltech-NUPACK/nupack/releases/download/4.0.0.27/nupack-4.0.0.27-linux64.tar.gz -o nupack.tar.gz && \
