@@ -3,14 +3,13 @@ import os
 import re
 import subprocess
 from typing import Dict, Any, List
-
 import pandas as pd
 import requests
 from Bio import SeqIO
 from Bio.Seq import Seq
 from tqdm import tqdm
+from viennaRNA import rnaUp
 
-RNAUP_BINARY_NAME = "/tamir2/peba/miniconda/bin/RNAup"
 WINDOW_SIZE = 23
 CONTEXT_WINDOW_SIZE = 50
 WINDOWS_COUNT = 1000
@@ -18,7 +17,7 @@ WINDOWS_COUNT = 1000
 def run_rna_up(sequence1, sequence2):
     try:
         return subprocess.check_output(
-            [RNAUP_BINARY_NAME, "-d", "2", "--noLP", "--include_both", "-c" "'S'"],
+            ["RNAup", "-d", "2", "--noLP", "--include_both", "-c", "'S'"],
             universal_newlines=True,
             input=f"{sequence1}&{sequence2}",
             text=True
@@ -45,7 +44,7 @@ def get_mRNA_opening_mfe(trigger, mRNA) -> float:
 
 
 def get_potential_windows_scores(mRNA: str, window_size: int = WINDOW_SIZE, context_window_size: int = CONTEXT_WINDOW_SIZE) -> pd.DataFrame:
-    windows_with_scores = []
+    windows_with_scores = {}
 
     for i in tqdm(range(len(mRNA))):
         if i + window_size > len(mRNA):
@@ -55,9 +54,8 @@ def get_potential_windows_scores(mRNA: str, window_size: int = WINDOW_SIZE, cont
         reverse_complement = Seq(window_sequence).reverse_complement_rna()
         mfe = get_mRNA_opening_mfe(reverse_complement,
                                    mRNA[max(i - context_window_size, 0):i + window_size + context_window_size])
-        windows_with_scores.append((window_sequence, i, mfe))
-
-    return pd.DataFrame(windows_with_scores, columns=["window_sequence", "window_index", 'mfe_score']).sort_values(by="mfe_score", ascending=True)
+        windows_with_scores[window_sequence] = mfe
+    return windows_with_scores
 
 if __name__ == '__main__':
     # gene_id = sys.argv[1]
