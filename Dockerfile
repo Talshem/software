@@ -38,8 +38,8 @@ RUN curl -L https://github.com/Caltech-NUPACK/nupack/releases/download/4.0.0.27/
     mv nupack-4.0.0.27 /opt/nupack && \
     rm nupack.tar.gz
 
-ENV GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/spry-ivy-431810-v0-1a142407d7b4.json"
-COPY spry-ivy-431810-v0-1a142407d7b4.json /app/spry-ivy-431810-v0-1a142407d7b4.json
+ENV GOOGLE_APPLICATION_CREDENTIALS="/credentials.json"
+COPY credentials.json /app/credentials.json
 
 
 # Copy the rest of the application code to /app
