@@ -28,19 +28,39 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Install dependencies for NUPACK
 RUN apt-get update && \
-    apt-get install -y build-essential cmake wget curl
+    apt-get install -y \
+    wget \
+    unzip \
+    build-essential \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libbz2-dev \
+    liblzma-dev \
+    zlib1g-dev \
+    libncurses5-dev \
+    libsqlite3-dev \
+    libreadline-dev \
+    libffi-dev \
+    liblzma-dev
 
-# Download and install NUPACK
-RUN curl -L https://github.com/Caltech-NUPACK/nupack/releases/download/4.0.0.27/nupack-4.0.0.27-linux64.tar.gz -o nupack.tar.gz && \
-    ls -l && \
-    tar -xvzf nupack.tar.gz && \
-    ls -l && \
-    mv nupack-4.0.0.27 /opt/nupack && \
-    rm nupack.tar.gz
-
+# Install Miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    /bin/bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda && \
+    rm Miniconda3-latest-Linux-x86_64.sh && \
+    /opt/miniconda/bin/conda update -n base -c defaults conda
 ENV GOOGLE_APPLICATION_CREDENTIALS="/credentials.json"
 COPY credentials.json /app/credentials.json
 
+# Set environment variables for Conda
+ENV PATH /opt/miniconda/bin:$PATH
+
+# Copy NUPACK zip file to the container
+COPY nupack-VERSION.zip ./
+
+# Unzip and install NUPACK
+RUN unzip nupack-VERSION.zip && \
+    cd nupack-VERSION && \
+    pip install -U nupack -f ./package
 
 # Copy the rest of the application code to /app
 COPY . /app
