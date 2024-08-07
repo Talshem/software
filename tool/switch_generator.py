@@ -13,7 +13,7 @@ START_CODON = "AUG"
 class SwitchGenerator:
     SEED = 42
 
-    def __init__(self, translated_gene_sequence: str, leader_sequence: str = "GGG",
+    def __init__(self, translated_gene_sequence: str, cell_type: str, leader_sequence: str = "GGG",
                  a_domain_size: int = 8, b_domain_size: int = 15, extra_stem_length: int = 0,
                  loop_size: int = 12, linker_pattern: str = "",
                  nucleotides_count_to_trim_gene_after: int = 30):
@@ -27,7 +27,7 @@ class SwitchGenerator:
         self.b_domain = Domain(f"N{b_domain_size}", name="b", material="rna")
         self.extra_stem = Domain(f"N{extra_stem_length}", name="b end", material="rna")
         self.loop = Domain(f"N{loop_size}", name="loop", material="rna")
-        self.kozak = Domain(KOZAK_SEQUENCE, name="kozak", material="rna")
+        self.kozak = Domain(KOZAK_SEQUENCE[cell_type], name="kozak", material="rna")
         self.linker = Domain(linker_pattern, name="linker", material="rna")
         self.translated_gene = Domain(self.translated_gene_sequence, name="translated gene", material="rna")
         self.trigger_length = a_domain_size + b_domain_size
@@ -36,7 +36,7 @@ class SwitchGenerator:
             self.loop, ~self.extra_stem, ~self.b_domain, self.kozak, self.linker, self.translated_gene
         ], name="switch")
         self.switch_structure = (f".{len(leader_sequence)}.{a_domain_size}({b_domain_size + extra_stem_length}"
-                                 f".{loop_size}){b_domain_size + extra_stem_length}.{len(KOZAK_SEQUENCE)}"
+                                 f".{loop_size}){b_domain_size + extra_stem_length}.{len(KOZAK_SEQUENCE[cell_type])}"
                                  f".{len(linker_pattern)}.{len(self.translated_gene_sequence)}")
         self.switch_complex = TargetComplex([self.switch], self.switch_structure, name='switch complex')
         self.activated_structure = self._get_activated_structure()
