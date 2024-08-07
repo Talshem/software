@@ -37,11 +37,7 @@ RUN curl -L https://github.com/Caltech-NUPACK/nupack/releases/download/4.0.0.27/
     ls -l && \
     mv nupack-4.0.0.27 /opt/nupack && \
     rm nupack.tar.gz
-
-# Set NUPACK environment variables
-ENV PATH="/opt/nupack/bin:$PATH"
-ENV NUPACKHOME="/opt/nupack"
-
+    
 # Copy the rest of the application code to /app
 COPY . /app
 
