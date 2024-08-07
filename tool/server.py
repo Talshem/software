@@ -13,7 +13,7 @@ from flask_wtf.file import FileField
 from wtforms import StringField, TextAreaField, SubmitField
 from werkzeug.utils import secure_filename
 import re
-
+from window_folding_based_selection import get_potential_windows_scores
 
 # Initialize the Flask app
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -63,6 +63,7 @@ def user_data_getter():
             user_trigger_bool = input_form.user_trigger.data
             uploaded_file = input_form.file.data
 
+
             # Process the file
             data_dict = generic_process_file(uploaded_file)
             # Assign and send the data to run_scoring.py in a subprocess
@@ -72,10 +73,12 @@ def user_data_getter():
             s_mrna = str(reporter_gene) if reporter_gene else "EMPTY"
             s_cell_type = str(cell_type) if cell_type else "EMPTY"
             s_file_dict = json.dumps(data_dict) if data_dict else "EMPTY"
-            print(f"Email: {s_email}, Gene: {s_gene}, Trigger: {s_trigger}, mRNA: {s_mrna}, Cell Type: {s_cell_type}, File: {s_file_dict}")
-            subprocess.Popen(["python3", "-m", "debugpy", "--listen", str(random.randint(10000, 50000)), "run_scoring.py",
-                              s_gene, s_trigger, s_mrna, s_cell_type, s_email, s_file_dict])
 
+            # send_email(email, "Form Submission Received", "Your form has been received and is being processed.")
+
+            optimal_triggers = get_potential_windows_scores(trigger)
+
+            # Process the file
             # Clear the form
             input_form.gene.data = ''
             input_form.trigger.data = ''
@@ -85,6 +88,8 @@ def user_data_getter():
             input_form.file.data = ''
 
             flash('Form submitted successfully. Job accepted.')
+            
+            
 
         except Exception as e:
             flash(f"Error processing form: {e}", "danger")
