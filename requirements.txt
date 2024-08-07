@@ -4,5 +4,5 @@ wtforms
 werkzeug
 flask_wtf
 werkzeug
-vienna-rna
+viennarna
 nupack
