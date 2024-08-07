@@ -5,3 +5,5 @@ steps:
     args: ['push', 'gcr.io/spry-ivy-431810-v0/protech']
 images:
   - 'gcr.io/spry-ivy-431810-v0/protech'
+options:
+  logging: CLOUD_LOGGING_ONLY
