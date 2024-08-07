@@ -65,10 +65,14 @@ def user_data_getter():
             user_trigger_bool = input_form.user_trigger.data
             uploaded_file = input_form.file.data
 
-
             # Process the file
             data_dict = generic_process_file(uploaded_file)
-            # Assign and send the data to run_scoring.py in a subprocess
+
+            result = subprocess.run(['python', 'generate_switch.py', trigger, reporter_gene],
+            capture_output=True,
+            text=True
+            )
+
             s_email = str(email) if email else "EMPTY"
             s_gene = str(gene) if gene else "EMPTY"
             s_trigger = str(trigger) if trigger else "EMPTY"
@@ -78,15 +82,6 @@ def user_data_getter():
 
             # send_email(email, "Form Submission Received", "Your form has been received and is being processed.")
 
-            optional_triggers = get_potential_windows_scores(trigger)
-            optimal_trigger = max(optional_triggers, key=optional_triggers.get)
-            switch_generator  = SwitchGenerator(reporter_gene)
-            switch = switch_generator.get_switch(optimal_trigger)
-
-            # send_email(email, "Results", f"Your switch is: {switch}")
-            
-            # Process the file
-            # Clear the form
             input_form.gene.data = ''
             input_form.trigger.data = ''
             input_form.reporter_gene.data = ''
@@ -146,7 +141,13 @@ def generic_process_file(uploaded_file):
                 return None
     return fasta_dict
 
-
+def generate_switch(trigger, reporter_gene):
+    optional_triggers = get_potential_windows_scores(trigger)
+    optimal_trigger = max(optional_triggers, key=optional_triggers.get)
+    switch_generator = SwitchGenerator(reporter_gene)
+    switch = switch_generator.get_switch(optimal_trigger)          
+    # send_email(email, "Results", f"Your switch is: {switch}")
+    return switch
 
 def validate_sequence(sequence):
     if not re.search(r"^[ACGT]", sequence):
