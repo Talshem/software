@@ -8,15 +8,16 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y build-essential gfortran wget python3 python3-pip
 
-# Download and extract the file (assuming a different format or URL)
-RUN wget https://www.nupack.org/download/nupack-4.0.tar && \
-    tar -xf nupack-4.0.tar && \
-    cd nupack-4.0 && \
+# Download and check the NUPACK file
+RUN wget https://www.nupack.org/download/nupack-4.0.tar.gz -O /tmp/nupack-4.0.tar.gz && \
+    file /tmp/nupack-4.0.tar.gz && \
+    tar -xzf /tmp/nupack-4.0.tar.gz -C /tmp && \
+    cd /tmp/nupack-4.0 && \
     ./configure && \
     make && \
     make install && \
-    cd .. && \
-    rm -rf nupack-4.0 nupack-4.0.tar
+    cd /tmp && \
+    rm -rf nupack-4.0 nupack-4.0.tar.gz
 
 # Set the working directory
 WORKDIR /tool
