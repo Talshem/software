@@ -4,3 +4,5 @@ wtforms
 werkzeug
 flask_wtf
 werkzeug
+rnaup
+nupack
