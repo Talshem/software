@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <title>Form Submission</title>
-    <style>
+    <style type = "text/css">
         h1 {
             margin-bottom: 20px;
             font-size: 3em;
@@ -49,7 +49,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 5px;
+
             border: 1px solid #ddd;
             border-radius: 4px;
             margin-bottom: 5px;
@@ -59,6 +59,59 @@
             border: none;
             color: #007bff;
             cursor: pointer;
+        }
+
+        .form-group {
+            position: relative;
+        }
+        .tooltiptext {
+            display: none; /* Initially hidden */
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            position: absolute;
+            top: 0;
+            left: 10%; /* Position tooltip to the right of the label */
+            margin-left: 10px;
+            z-index: 1;
+        }
+        label:hover + .tooltiptext { /* Show the tooltip when hovering over the label */
+            display: inline-block;
+            opacity: 1;
+        }
+        .question-mark {
+            display: block;
+            position: right;
+            top: 120%; /* Position below the input box */
+            left: 0%;
+            margin-left: 5px; /* Adjust spacing between the input field and the question mark */
+            cursor: pointer;
+            color: #007bff;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .tooltiptext2 {
+            display: none; /* Initially hidden */
+            background-color: #555;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+
+            top: 50%; /* Position below the input box */
+            left: 0%;
+            white-space: nowrap;
+            z-index: 1;
+        }
+
+        .question-mark:hover + .tooltiptext2 {
+            display: none;
+        }
+
+        /* Hide label and description when field is disabled */
+        .form-group.disabled {
+            display: none;
         }
     </style>
 </head>
@@ -71,27 +124,48 @@
 
             <div class="form-group">
                 {{ input_form.email.label }}
+                <span class="tooltiptext">Add a valid email</span>
                 {{ input_form.email(class="form-control") }}
+
             </div>
-            <div class="form-group">
+            <div class="form-group" data-toggle="tooltip">
+
                 {{ input_form.gene.label }}
+                <span class="tooltiptext">Enter the gene sequence to be analyzed.</span>
                 {{ input_form.gene(class="form-control") }}
+                <span class="question-mark">?</span> <!-- Question mark next to the label -->
+                <span class="tooltiptext2">Additional information about the gene input</span>
             </div>
-            <div class="form-group" data-toggle="tooltip" title="Mark in case the desired target contains mutation">
-                {{ input_form.user_trigger.label }}
+            <div class="form-group" data-toggle="tooltip">
                 {{ input_form.user_trigger }}
+                {{ input_form.user_trigger.label }}
+                <span class="tooltiptext">Check if you have a known trigger.</span>
+                <span class="question-mark">?</span> <!-- Question mark next to the label -->
+                <span class="tooltiptext2">Note: in case of mutated gene, mark, add the WT gene to File and fill the Trigger section.</span>
             </div>
-            <div class="form-group" data-toggle="tooltip" title="Enter the target sequence with the mutation. 20-40 nuc">
+            <div class="form-group" data-toggle="tooltip">
                 {{ input_form.trigger.label }}
+                <span class="tooltiptext">Enter the target sequence with the mutation. 15-30 nuc.</span>
                 {{ input_form.trigger(class="form-control") }}
+                <span class="question-mark">?</span> <!-- Question mark next to the label -->
+                <span class="tooltiptext2">Additional information about the trigger input</span>
             </div>
-            <div class="form-group" data-toggle="tooltip" title="Enter the reporter gene.">
+            <div class="form-group" data-toggle="tooltip">
                 {{ input_form.reporter_gene.label }}
+                <span class="tooltiptext">Enter gene to be transcribed.</span>
                 {{ input_form.reporter_gene(class="form-control") }}
+                <span class="question-mark">?</span> <!-- Question mark next to the label -->
+                <span class="tooltiptext2">Additional information about the reporter gene input</span>
+
             </div>
-            <div class="form-group" data-toggle="tooltip" title="Specify the organism that hosts the Toehold-Target construct.">
+            <div class="form-group" data-toggle="tooltip">
                 {{ input_form.cell_type.label }}
+                <span class="tooltiptext">Specify the organism that hosts the Toehold-Target construct.</span>
                 {{ input_form.cell_type(class="form-control") }}
+                <span class="question-mark">?</span> <!-- Question mark next to the label -->
+                <span class="tooltiptext2">Additional information about the cell type input</span>
+                <span class="tooltiptext">Drop files here or click to upload</span>
+
             </div>
             <div class="form-group" data-toggle="tooltip" title="File format '.fasta', Organism genome will be used in the absence of a file.">
                 {{ input_form.file.label }}
@@ -100,6 +174,7 @@
                     {{ input_form.file(class="form-control-file") }}
                 </div>
                 <div class="file-list"></div>
+
             </div>
 
             {{ input_form.submit(class="btn btn-primary") }}
@@ -116,7 +191,7 @@
             {% endif %}
         {% endwith %}
     </div>
-
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -201,6 +276,19 @@
 
             fileDropArea.addEventListener('click', function () {
                 fileInput.click();
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function() {
+            var questionMarks = document.querySelectorAll('.question-mark');
+            questionMarks.forEach(function(qm) {
+                qm.addEventListener('click', function() {
+                    var tooltip = this.nextElementSibling;
+                    if (tooltip.style.display === "none" || tooltip.style.display === "") {
+                        tooltip.style.display = "block"; /* Display the tooltip as a block element */
+                    } else {
+                        tooltip.style.display = "none";
+                    }
+                });
             });
         });
     </script>
