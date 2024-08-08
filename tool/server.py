@@ -37,7 +37,7 @@ class InputForm(FlaskForm):
     user_trigger = BooleanField("Got a known trigger?",  render_kw={"id": "user_trigger"})
     trigger = StringField("Input Trigger", render_kw={"id": "trigger"})
     reporter_gene = StringField("Reporter Gene", render_kw={"id": "reporter_gene"})
-    cell_type = SelectField("Organism Type", choices=[('Prokaryote', 'Prokaryote'), ('Eukaryote', 'Eukaryote')], render_kw={"id": "cell_type"})
+    cell_type = SelectField("Organism Type", choices=[('-', '-'),('Prokaryote', 'Prokaryote'), ('Eukaryote', 'Eukaryote'),('Homo sapiens', 'Homo sapiens')], render_kw={"id": "cell_type"})
     file = FileField('File', render_kw={"id": "file"})
     submit = SubmitField("Submit")
 
