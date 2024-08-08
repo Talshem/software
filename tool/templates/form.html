@@ -81,23 +81,25 @@
             opacity: 1;
         }
         .question-mark {
-            display: block;
+            display: inline - block;
             position: right;
-            top: 120%; /* Position below the input box */
-            left: 0%;
-            margin-left: 5px; /* Adjust spacing between the input field and the question mark */
+            top: 100%; /* Position below the input box */
+            left: 95%;
+            margin-left: 0px; /* Adjust spacing between the input field and the question mark */
             cursor: pointer;
+
             color: #007bff;
             font-weight: bold;
             position: relative;
         }
+
 
         .tooltiptext2 {
             display: none; /* Initially hidden */
             background-color: #555;
             color: #fff;
             text-align: left;
-            border-radius: 6px;
+            border-radius: 0px;
 
             top: 50%; /* Position below the input box */
             left: 0%;
@@ -106,6 +108,9 @@
         }
 
         .question-mark:hover + .tooltiptext2 {
+            display: none;
+        }
+        .question-mark-known-trigger:hover + .tooltiptext2 {
             display: none;
         }
 
@@ -136,12 +141,12 @@
                 <span class="question-mark">?</span> <!-- Question mark next to the label -->
                 <span class="tooltiptext2">Additional information about the gene input</span>
             </div>
-            <div class="form-group" data-toggle="tooltip">
-                {{ input_form.user_trigger }}
-                {{ input_form.user_trigger.label }}
-                <span class="tooltiptext">Check if you have a known trigger.</span>
-                <span class="question-mark">?</span> <!-- Question mark next to the label -->
+            <div class="form-group" data-toggle="tooltip" >
+                <span class="question-mark">?</span>
                 <span class="tooltiptext2">Note: in case of mutated gene, mark, add the WT gene to File and fill the Trigger section.</span>
+                {{ input_form.user_trigger(class="form-control-inline") }}
+                {{ input_form.user_trigger.label }} <!-- Label on the right -->
+
             </div>
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.trigger.label }}
@@ -191,7 +196,7 @@
             {% endif %}
         {% endwith %}
     </div>
-    
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -199,6 +204,28 @@
         // Initialize tooltips
         $(document).ready(function(){
             $('[data-toggle="tooltip"]').tooltip();
+        });
+
+        // JavaScript to handle enabling/disabling fields based on checkbox
+        document.addEventListener("DOMContentLoaded", function() {
+            var userTriggerCheckbox = document.getElementById("user_trigger");
+            var geneFieldGroup = document.querySelector(".form-group:nth-child(3)");
+            var triggerFieldGroup = document.querySelector(".form-group:nth-child(5)");
+
+            function toggleFields() {
+                if (userTriggerCheckbox.checked) {
+                    geneFieldGroup.classList.add('disabled');
+                    triggerFieldGroup.classList.remove('disabled');
+                } else {
+                    geneFieldGroup.classList.remove('disabled');
+                    triggerFieldGroup.classList.add('disabled');
+                }
+            }
+
+            userTriggerCheckbox.addEventListener("change", toggleFields);
+
+            // Initial call to set the state correctly on page load
+            toggleFields();
         });
 
         // JavaScript to handle drag and drop functionality
@@ -277,20 +304,21 @@
             fileDropArea.addEventListener('click', function () {
                 fileInput.click();
             });
+
         });
-        document.addEventListener("DOMContentLoaded", function() {
-            var questionMarks = document.querySelectorAll('.question-mark');
-            questionMarks.forEach(function(qm) {
-                qm.addEventListener('click', function() {
-                    var tooltip = this.nextElementSibling;
-                    if (tooltip.style.display === "none" || tooltip.style.display === "") {
-                        tooltip.style.display = "block"; /* Display the tooltip as a block element */
-                    } else {
-                        tooltip.style.display = "none";
-                    }
-                });
+    document.addEventListener("DOMContentLoaded", function() {
+        var questionMarks = document.querySelectorAll('.question-mark');
+        questionMarks.forEach(function(qm) {
+            qm.addEventListener('click', function() {
+                var tooltip = this.nextElementSibling;
+                if (tooltip.style.display === "none" || tooltip.style.display === "") {
+                    tooltip.style.display = "block"; /* Display the tooltip as a block element */
+                } else {
+                    tooltip.style.display = "none";
+                }
             });
         });
+    });
     </script>
 </body>
 </html>
