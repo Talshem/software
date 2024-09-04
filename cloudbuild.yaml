@@ -11,11 +11,8 @@ steps:
         # Authenticate with GitHub CLI
         echo "${gcloud secrets versions access latest --secret="GITHUB_TOKEN"}" | gh auth login --with-token
 
-        # Retrieve the base64-encoded secret from GitHub
-        SECRET_BASE64=$(gh secret view CREDENTIALS_JSON --repo talshem/software --json value -q '.value')
-
         # Decode the base64 secret and save it as credentials.json
-        echo "$SECRET_BASE64" | base64 --decode > credentials.json
+        echo "$(gh secret view CREDENTIALS_JSON --repo talshem/software --json value -q '.value')" | base64 --decode > credentials.json
 
   # Build the Docker image with build arguments
   - name: 'gcr.io/cloud-builders/docker'
