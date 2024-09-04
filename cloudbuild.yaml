@@ -14,6 +14,13 @@ steps:
         # Decode the base64 secret and save it as credentials.json
         echo "$(gh secret view CREDENTIALS_JSON --repo talshem/software --json value -q '.value')" | base64 --decode > credentials.json
 
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud auth activate-service-account --key-file=credentials.json
+
   # Build the Docker image with build arguments
   - name: 'gcr.io/cloud-builders/docker'
     args:
