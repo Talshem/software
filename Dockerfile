@@ -41,7 +41,7 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
 
 # Set environment variable for Google Application Credentials
 ARG GOOGLE_APPLICATION_CREDENTIALS
-COPY ${GOOGLE_APPLICATION_CREDENTIALS_PATH} /app/credentials.json
+COPY ${GOOGLE_APPLICATION_CREDENTIALS} /app/credentials.json
 
 RUN gcloud auth activate-service-account --key-file=/app/credentials.json
 
