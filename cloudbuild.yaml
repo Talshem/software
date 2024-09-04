@@ -8,11 +8,8 @@ steps:
         # Install GitHub CLI (gh) if not already available
         apt-get update && apt-get install -y gh
 
-        # Retrieve the GitHub token from Secret Manager
-        GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")
-        
         # Authenticate with GitHub CLI
-        echo "${GITHUB_TOKEN}" | gh auth login --with-token
+        echo "${gcloud secrets versions access latest --secret="GITHUB_TOKEN"}" | gh auth login --with-token
 
         # Retrieve the base64-encoded secret from GitHub
         SECRET_BASE64=$(gh secret view CREDENTIALS_JSON --repo talshem/software --json value -q '.value')
