@@ -20,6 +20,8 @@ steps:
       - '-c'
       - |
         gcloud auth activate-service-account --key-file=credentials.json
+        gcloud auth list
+        gcloud config list
 
   # Build the Docker image with build arguments
   - name: 'gcr.io/cloud-builders/docker'
