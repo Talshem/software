@@ -29,11 +29,11 @@ RUN apt-get update && \
     ca-certificates \
     gnupg
 
-# Add the Google Cloud SDK keyring
-RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | tee /usr/share/keyrings/cloud.google.gpg > /dev/null
+# Download the Google Cloud SDK public key and add it to the keyring
+RUN curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | tee /usr/share/keyrings/cloud.google.gpg > /dev/null
 
-# Add the Google Cloud SDK repository
-RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee /etc/apt/sources.list.d/google-cloud-sdk.list
+# Add the Google Cloud SDK repository and associate it with the keyring
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee /etc/apt/sources.list.d/google-cloud-sdk.list > /dev/null
 
 # Install Google Cloud SDK
 RUN apt-get update && apt-get install -y google-cloud-sdk
