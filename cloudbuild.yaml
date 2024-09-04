@@ -1,18 +1,10 @@
 steps:
-  # Retrieve the credentials from Secret Manager and write to a file
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud secrets versions access latest --secret=my-credentials > credentials.json
-
-  # Build the Docker image, using the credentials file
+  # Build the Docker image with build arguments
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '--build-arg'
-      - 'CREDENTIALS_JSON=credentials.json'
+      - 'CREDENTIALS_JSON=./path/to/credentials.json'
       - '-t'
       - 'gcr.io/spry-ivy-431810-v0/protech'
       - '.'
@@ -25,7 +17,7 @@ steps:
 
   # Deploy the image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
+    entrypoint: 'gcloud'
     args:
       - 'run'
       - 'deploy'
@@ -39,5 +31,6 @@ steps:
 
 images:
   - 'gcr.io/spry-ivy-431810-v0/protech'
+
 options:
   logging: CLOUD_LOGGING_ONLY
