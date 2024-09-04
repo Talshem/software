@@ -43,8 +43,7 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
 ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json"
 
 # Download NUPACK zip file from the Google Cloud Storage bucket and install NUPACK
-RUN gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS && \
-    gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.7.zip /app/nupack-4.0.1.7.zip && \
+RUN gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.7.zip /app/nupack-4.0.1.7.zip && \
     cd /app && \
     unzip nupack-4.0.1.7.zip && \
     cd nupack-4.0.1.7 && \
