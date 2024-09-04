@@ -9,7 +9,7 @@ steps:
         apt-get update && apt-get install -y gh
 
         # Retrieve the GitHub token from Secret Manager
-        GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="SECRET_TOKEN")
+        GITHUB_TOKEN=$(gh secret view CREDENTIALS_JSON --repo talshem/software --json value -q '.value')
 
         # Authenticate with GitHub CLI
         echo "${GITHUB_TOKEN}" | gh auth login --with-token
@@ -20,7 +20,7 @@ steps:
         # Decode the base64 secret and save it as credentials.json
         echo "$SECRET_BASE64" | base64 --decode > credentials.json
 
-  # Build the Docker image with build arguments 
+  # Build the Docker image with build arguments
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
