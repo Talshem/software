@@ -1,44 +1,51 @@
 steps:
-  # Decode the Base64 encoded credentials
-  - name: 'alpine'
-    id: 'decode'
-    entrypoint: 'sh'
+  # Decode the base64 secret and store it as credentials.json
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
     args:
-    - '-c'
-    - |
-      echo $CREDENTIALS_JSON | base64 --decode > /workspace/credentials.json
-    env:
-    - 'CREDENTIALS_JSON=$(CREDENTIALS_JSON)'
+      - '-c'
+      - |
+        # Install GitHub CLI (gh) if not already available
+        apt-get update && apt-get install -y gh
 
-  # Build the Docker image with the decoded credentials
+        # Authenticate with GitHub CLI
+        echo "${GITHUB_TOKEN}" | gh auth login --with-token
+        
+        # Retrieve the base64-encoded secret from GitHub
+        SECRET_BASE64=$(gh secret view CREDENTIALS_JSON --repo talshem/software --json value -q '.value')
+
+        # Decode the base64 secret and save it as credentials.json
+        echo "$SECRET_BASE64" | base64 --decode > credentials.json
+
+  # Build the Docker image with build arguments 
   - name: 'gcr.io/cloud-builders/docker'
     args:
-    - 'build'
-    - '--build-arg'
-    - 'CREDENTIALS_JSON=/workspace/credentials.json'
-    - '-t'
-    - 'gcr.io/spry-ivy-431810-v0/protech'
-    - '.'
+      - 'build'
+      - '--build-arg'
+      - 'CREDENTIALS_JSON=./credentials.json'
+      - '-t'
+      - 'gcr.io/spry-ivy-431810-v0/protech'
+      - '.'
 
   # Push the Docker image to Google Container Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
-    - 'push'
-    - 'gcr.io/spry-ivy-431810-v0/protech'
+      - 'push'
+      - 'gcr.io/spry-ivy-431810-v0/protech'
 
   # Deploy the image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
     args:
-    - 'run'
-    - 'deploy'
-    - 'nupack-app'
-    - '--image'
-    - 'gcr.io/spry-ivy-431810-v0/protech'
-    - '--platform'
-    - 'managed'
-    - '--region'
-    - 'us-central1'
+      - 'run'
+      - 'deploy'
+      - 'nupack-app'
+      - '--image'
+      - 'gcr.io/spry-ivy-431810-v0/protech'
+      - '--platform'
+      - 'managed'
+      - '--region'
+      - 'us-central1'
 
 images:
   - 'gcr.io/spry-ivy-431810-v0/protech'
