@@ -53,12 +53,12 @@ COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Download NUPACK zip file from the Google Cloud Storage bucket and install NUPACK
-RUN gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.7.zip /app/nupack-4.0.1.7.zip && \
+RUN gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS && \
+    gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.7.zip /app/nupack-4.0.1.7.zip && \
     cd /app && \
     unzip nupack-4.0.1.7.zip && \
     cd nupack-4.0.1.7 && \
     pip install -U nupack -f ./package
-
 # Copy the rest of the application code to /app
 COPY . /app
 
