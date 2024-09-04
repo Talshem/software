@@ -67,4 +67,3 @@ EXPOSE 8080
 
 # Run tool/server.py when the container launches
 CMD ["python", "tool/server.py"]
- 
