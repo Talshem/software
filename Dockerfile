@@ -4,6 +4,14 @@ FROM python:3.9-slim
 # Set the working directory in the container
 WORKDIR /app
 
+# Set environment variable for Google Application Credentials
+ARG CREDENTIALS_JSON
+RUN echo "$CREDENTIALS_JSON" > /app/credentials.json
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
+
+RUN cat /app/credentials.json
+
+
 # Install dependencies for NUPACK, Miniconda, and Google Cloud SDK
 RUN apt-get update && \
     apt-get install -y \
@@ -38,12 +46,6 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
     /bin/bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda && \
     rm Miniconda3-latest-Linux-x86_64.sh && \
     /opt/miniconda/bin/conda update -n base -c defaults conda
-
-# Set environment variable for Google Application Credentials
-ARG CREDENTIALS_JSON
-COPY ${CREDENTIALS_JSON} /app/credentials.json
-
-RUN cat /app/credentials.json
 
 RUN gcloud auth activate-service-account --key-file=/app/credentials.json
 
