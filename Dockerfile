@@ -40,7 +40,7 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
     /opt/miniconda/bin/conda update -n base -c defaults conda
 
 # Set environment variable for Google Application Credentials
-ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json"
+ARG GOOGLE_APPLICATION_CREDENTIALS
 
 # Download NUPACK zip file from the Google Cloud Storage bucket and install NUPACK
 RUN gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.7.zip /app/nupack-4.0.1.7.zip && \
