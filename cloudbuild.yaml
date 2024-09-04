@@ -9,7 +9,7 @@ steps:
         apt-get update && apt-get install -y gh
 
         # Retrieve the GitHub token from Secret Manager
-        SECRET_TOKEN=$(gh secret view CREDENTIALS_JSON --repo talshem/software --json value -q '.value')
+        SECRET_TOKEN=$(gh secret view SECRET_TOKEN --repo talshem/software --json value -q '.value')
 
         # Authenticate with GitHub CLI
         echo "${SECRET_TOKEN}" | gh auth login --with-token
