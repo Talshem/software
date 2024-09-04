@@ -10,7 +10,7 @@ COPY requirements.txt /app/
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install dependencies for NUPACK and Miniconda
+# Install dependencies for NUPACK, Miniconda, and Google Cloud SDK
 RUN apt-get update && \
     apt-get install -y \
     wget \
@@ -24,7 +24,13 @@ RUN apt-get update && \
     libncurses5-dev \
     libsqlite3-dev \
     libreadline-dev \
-    libffi-dev
+    libffi-dev \
+    apt-transport-https \
+    ca-certificates \
+    gnupg && \
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
+    apt-get update && apt-get install -y google-cloud-sdk
 
 # Install Miniconda
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
@@ -35,23 +41,21 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
 # Set environment variables for Conda
 ENV PATH /opt/miniconda/bin:$PATH
 
-# Copy NUPACK zip file to the container
-COPY nupack-4.0.1.7.zip /app/
+# Copy credentials file to the container
+COPY credentials.json /app/credentials.json
 
-# Unzip and install NUPACK
-RUN cd /app && \
+# Set environment variable for Google Application Credentials
+ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json"
+
+# Download NUPACK zip file from the Google Cloud Storage bucket and install NUPACK
+RUN gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.7.zip /app/nupack-4.0.1.7.zip && \
+    cd /app && \
     unzip nupack-4.0.1.7.zip && \
     cd nupack-4.0.1.7 && \
     pip install -U nupack -f ./package
 
-# Copy credentials file to the container
-COPY credentials.json /app/credentials.json
-
 # Copy the rest of the application code to /app
 COPY . /app
-
-# Set environment variable for credentials
-ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json"
 
 # Make port 8080 available to the world outside this container
 EXPOSE 8080
