@@ -9,8 +9,8 @@ steps:
         apt-get update && apt-get install -y gh
         
         # Authenticate with GitHub CLI
-        SECRET_TOKEN=$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")
-        echo "${SECRET_TOKEN}" | gh auth login --with-token
+        GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")
+        echo "${GITHUB_TOKEN}" | gh auth login --with-token
 
         # Retrieve the base64-encoded secret from GitHub
         SECRET_BASE64=$(gh secret view CREDENTIALS_JSON --repo talshem/software --json value -q '.value')
