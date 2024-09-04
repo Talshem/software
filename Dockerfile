@@ -4,21 +4,16 @@ FROM python:3.9-slim
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements.txt file into the container at /app
-COPY requirements.txt /app/
-
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Install dependencies for NUPACK, Miniconda, and Google Cloud SDK
 RUN apt-get update && \
     apt-get install -y \
     wget \
+    curl \
     unzip \
+    gnupg \
     build-essential \
     libcurl4-openssl-dev \
     libssl-dev \
-    curl \
     libbz2-dev \
     liblzma-dev \
     zlib1g-dev \
@@ -27,8 +22,7 @@ RUN apt-get update && \
     libreadline-dev \
     libffi-dev \
     apt-transport-https \
-    ca-certificates \
-    gnupg
+    ca-certificates
 
 # Download the specific Google Cloud SDK public key and add it to the keyring
 RUN curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
@@ -48,11 +42,18 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
 # Set environment variables for Conda
 ENV PATH /opt/miniconda/bin:$PATH
 
-# Copy credentials file to the container
-COPY credentials.json /app/credentials.json
-
 # Set environment variable for Google Application Credentials
+ARG CREDENTIALS_JSON=credentials.json
 ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json"
+
+# Copy the credentials file into the container if provided
+COPY ${CREDENTIALS_JSON} /app/credentials.json
+
+# Copy the requirements.txt file into the container at /app
+COPY requirements.txt /app/
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Download NUPACK zip file from the Google Cloud Storage bucket and install NUPACK
 RUN gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.7.zip /app/nupack-4.0.1.7.zip && \
