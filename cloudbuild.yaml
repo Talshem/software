@@ -9,6 +9,7 @@ steps:
         apt-get update && apt-get install -y gh
 
         # Authenticate with GitHub CLI
+        GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="SECRET_TOKEN")
         echo "${GITHUB_TOKEN}" | gh auth login --with-token
         
         # Retrieve the base64-encoded secret from GitHub
