@@ -43,11 +43,8 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
 ENV PATH /opt/miniconda/bin:$PATH
 
 # Set environment variable for Google Application Credentials
-ARG CREDENTIALS_JSON
 ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json"
 
-# Copy the credentials file into the container if provided
-COPY ${CREDENTIALS_JSON} /app/credentials.json
 
 # Copy the requirements.txt file into the container at /app
 COPY requirements.txt /app/
