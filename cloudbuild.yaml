@@ -1,18 +1,43 @@
 steps:
-  # Build the Docker image
+  # Retrieve the credentials from Secret Manager and write to a file
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud secrets versions access latest --secret=my-credentials > credentials.json
+
+  # Build the Docker image, using the credentials file
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/spry-ivy-431810-v0/protech', '.']
+    args:
+      - 'build'
+      - '--build-arg'
+      - 'CREDENTIALS_JSON=credentials.json'
+      - '-t'
+      - 'gcr.io/spry-ivy-431810-v0/protech'
+      - '.'
 
   # Push the Docker image to Google Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/spry-ivy-431810-v0/protech']
+    args:
+      - 'push'
+      - 'gcr.io/spry-ivy-431810-v0/protech'
 
   # Deploy the image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
-    args: ['run', 'deploy', 'nupack-app', '--image', 'gcr.io/spry-ivy-431810-v0/protech', '--platform', 'managed', '--region', 'us-central1']
+    args:
+      - 'run'
+      - 'deploy'
+      - 'nupack-app'
+      - '--image'
+      - 'gcr.io/spry-ivy-431810-v0/protech'
+      - '--platform'
+      - 'managed'
+      - '--region'
+      - 'us-central1'
+
 images:
-  - 'gcr.io/$PROJECT_ID/nupack-app'
+  - 'gcr.io/spry-ivy-431810-v0/protech'
 options:
   logging: CLOUD_LOGGING_ONLY
-
