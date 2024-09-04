@@ -4,19 +4,6 @@ FROM python:3.9-slim
 # Set the working directory in the container
 WORKDIR /app
 
-# Set environment variable for Google Application Credentials
-ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json"
-
-# Download NUPACK zip file from the Google Cloud Storage bucket and install NUPACK
-RUN gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS && \
-    gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.7.zip /app/nupack-4.0.1.7.zip && \
-    cd /app && \
-    unzip nupack-4.0.1.7.zip && \
-    cd nupack-4.0.1.7 && \
-    pip install -U nupack -f ./package
-# Copy the rest of the application code to /app
-COPY . /app
-
 # Install dependencies for NUPACK, Miniconda, and Google Cloud SDK
 RUN apt-get update && \
     apt-get install -y \
@@ -51,6 +38,19 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
     /bin/bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda && \
     rm Miniconda3-latest-Linux-x86_64.sh && \
     /opt/miniconda/bin/conda update -n base -c defaults conda
+
+# Set environment variable for Google Application Credentials
+ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json"
+
+# Download NUPACK zip file from the Google Cloud Storage bucket and install NUPACK
+RUN gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS && \
+    gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.7.zip /app/nupack-4.0.1.7.zip && \
+    cd /app && \
+    unzip nupack-4.0.1.7.zip && \
+    cd nupack-4.0.1.7 && \
+    pip install -U nupack -f ./package
+# Copy the rest of the application code to /app
+COPY . /app
 
 # Set environment variables for Conda
 ENV PATH /opt/miniconda/bin:$PATH
