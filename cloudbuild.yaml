@@ -1,5 +1,5 @@
 steps:
-  # Decode the base64 secret and store it as credentials.json
+  # Retrieve the GitHub token from Secret Manager
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -8,10 +8,12 @@ steps:
         # Install GitHub CLI (gh) if not already available
         apt-get update && apt-get install -y gh
 
-        # Authenticate with GitHub CLI
+        # Retrieve the GitHub token from Secret Manager
         GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="SECRET_TOKEN")
+
+        # Authenticate with GitHub CLI
         echo "${GITHUB_TOKEN}" | gh auth login --with-token
-        
+
         # Retrieve the base64-encoded secret from GitHub
         SECRET_BASE64=$(gh secret view CREDENTIALS_JSON --repo talshem/software --json value -q '.value')
 
