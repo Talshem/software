@@ -18,6 +18,7 @@ RUN apt-get update && \
     build-essential \
     libcurl4-openssl-dev \
     libssl-dev \
+    curl \
     libbz2-dev \
     liblzma-dev \
     zlib1g-dev \
