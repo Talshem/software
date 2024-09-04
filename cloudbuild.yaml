@@ -1,33 +1,44 @@
 steps:
-  # Build the Docker image with build arguments 
+  # Decode the Base64 encoded credentials
+  - name: 'alpine'
+    id: 'decode'
+    entrypoint: 'sh'
+    args:
+    - '-c'
+    - |
+      echo $CREDENTIALS_JSON | base64 --decode > /workspace/credentials.json
+    env:
+    - 'CREDENTIALS_JSON=$(CREDENTIALS_JSON)'
+
+  # Build the Docker image with the decoded credentials
   - name: 'gcr.io/cloud-builders/docker'
     args:
-      - 'build'
-      - '--build-arg'
-      - 'CREDENTIALS_JSON=./credentials.json'
-      - '-t'
-      - 'gcr.io/spry-ivy-431810-v0/protech'
-      - '.'
+    - 'build'
+    - '--build-arg'
+    - 'CREDENTIALS_JSON=/workspace/credentials.json'
+    - '-t'
+    - 'gcr.io/spry-ivy-431810-v0/protech'
+    - '.'
 
   # Push the Docker image to Google Container Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
-      - 'push'
-      - 'gcr.io/spry-ivy-431810-v0/protech'
+    - 'push'
+    - 'gcr.io/spry-ivy-431810-v0/protech'
 
   # Deploy the image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
     args:
-      - 'run'
-      - 'deploy'
-      - 'nupack-app'
-      - '--image'
-      - 'gcr.io/spry-ivy-431810-v0/protech'
-      - '--platform'
-      - 'managed'
-      - '--region'
-      - 'us-central1'
+    - 'run'
+    - 'deploy'
+    - 'nupack-app'
+    - '--image'
+    - 'gcr.io/spry-ivy-431810-v0/protech'
+    - '--platform'
+    - 'managed'
+    - '--region'
+    - 'us-central1'
 
 images:
   - 'gcr.io/spry-ivy-431810-v0/protech'
