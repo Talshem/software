@@ -28,7 +28,7 @@ steps:
     args:
       - 'build'
       - '--build-arg'
-      - 'CREDENTIALS_JSON=./credentials.json'
+      - 'CREDENTIALS_JSON=$(credentials.json)'
       - '-t'
       - 'gcr.io/spry-ivy-431810-v0/protech'
       - '.'
