@@ -9,7 +9,7 @@ steps:
         apt-get update && apt-get install -y gh
 
         # Authenticate with GitHub CLI
-        echo "${gcloud secrets versions access latest --secret="GITHUB_TOKEN"}" | gh auth login --with-token
+        echo "${gcloud secrets versions access latest --secret=GITHUB_TOKEN}" | gh auth login --with-token
 
         # Decode the base64 secret and save it as credentials.json
         echo "$(gh secret view CREDENTIALS_JSON --repo talshem/software --json value -q '.value')" | base64 --decode > credentials.json
@@ -28,7 +28,7 @@ steps:
     args:
       - 'build'
       - '--build-arg'
-      - 'cat credentials.json>CREDENTIALS_JSON'
+      - 'CREDENTIALS_JSON=$(cat credentials.json | base64)'
       - '-t'
       - 'gcr.io/spry-ivy-431810-v0/protech'
       - '.'
