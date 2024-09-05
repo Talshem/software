@@ -37,12 +37,6 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
 
 ENV PATH /opt/miniconda/bin:$PATH
 
-RUN gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.12.zip /app/nupack-4.0.1.12.zip && \
-    cd /app && \
-    unzip nupack-4.0.1.12.zip && \
-    cd nupack-4.0.1.12 && \
-    pip install -U nupack -f ./package
-
 COPY . /app
 
 COPY requirements.txt /app/
@@ -55,6 +49,12 @@ RUN --mount=type=secret,id=credentials_json \
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
 
 RUN gcloud auth activate-service-account --key-file=/app/credentials.json
+
+RUN gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.12.zip /app/nupack-4.0.1.12.zip && \
+    cd /app && \
+    unzip nupack-4.0.1.12.zip && \
+    cd nupack-4.0.1.12 && \
+    pip install -U nupack -f ./package
 
 EXPOSE 8080
 
