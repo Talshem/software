@@ -1,60 +1,33 @@
-steps:
-  # Retrieve the GitHub token from Secret Manager
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        # Install GitHub CLI (gh) if not already available
-        apt-get update && apt-get install -y gh
+name: Build and Push Docker Image
 
-        # Authenticate with GitHub CLI
-        echo "${gcloud secrets versions access latest --secret=GITHUB_TOKEN}" | gh auth login --with-token
+on:
+  push:
+    branches:
+      - main
 
-        # Decode the base64 secret and save it as credentials.json
-        echo "$(gh secret view CREDENTIALS_JSON --repo talshem/software --json value -q '.value')" | base64 --decode > credentials.json
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud auth activate-service-account --key-file=credentials.json
-        gcloud auth list
-        gcloud config list
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-  # Build the Docker image with build arguments
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'build'
-      - '--build-arg'
-      - 'CREDENTIALS_JSON=$(cat credentials.json | base64)'
-      - '-t'
-      - 'gcr.io/spry-ivy-431810-v0/protech'
-      - '.'
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-  # Push the Docker image to Google Container Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - 'gcr.io/spry-ivy-431810-v0/protech'
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-  # Deploy the image to Cloud Run
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'gcloud'
-    args:
-      - 'run'
-      - 'deploy'
-      - 'nupack-app'
-      - '--image'
-      - 'gcr.io/spry-ivy-431810-v0/protech'
-      - '--platform'
-      - 'managed'
-      - '--region'
-      - 'us-central1'
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: Dockerfile:latest
+          build-args: 
+            CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS }}
 
-images:
-  - 'gcr.io/spry-ivy-431810-v0/protech'
-
-options:
-  logging: CLOUD_LOGGING_ONLY
