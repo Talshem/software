@@ -4,6 +4,11 @@ FROM python:3.9-slim
 # Set the working directory in the container
 WORKDIR /app
 
+# Set environment variable for Google Application Credentials
+ARG CREDENTIALS_JSON
+RUN echo "$CREDENTIALS_JSON" > /app/credentials.json
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
+
 # Install dependencies for NUPACK, Miniconda, and Google Cloud SDK
 RUN apt-get update && \
     apt-get install -y \
@@ -37,24 +42,17 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
 
 ENV PATH /opt/miniconda/bin:$PATH
 
-COPY . /app
-
-COPY requirements.txt /app/
-
-RUN pip install --no-cache-dir -r requirements.txt
-
-RUN --mount=type=secret,id=credentials_json \
-    cat /run/secrets/credentials_json > /app/credentials.json
-
-ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
-
-RUN gcloud auth activate-service-account --key-file=/app/credentials.json
-
 RUN gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.12.zip /app/nupack-4.0.1.12.zip && \
     cd /app && \
     unzip nupack-4.0.1.12.zip && \
     cd nupack-4.0.1.12 && \
     pip install -U nupack -f ./package
+
+COPY . /app
+
+COPY requirements.txt /app/
+
+RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8080
 
