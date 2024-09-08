@@ -7,7 +7,6 @@ WORKDIR /app
 # Set environment variable for Google Application Credentials
 ARG CREDENTIALS_JSON
 RUN echo "$CREDENTIALS_JSON" > /app/credentials.json
-ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
 
 # Install dependencies for NUPACK, Miniconda, and Google Cloud SDK
 RUN apt-get update && \
@@ -29,11 +28,9 @@ RUN apt-get update && \
     apt-transport-https \
     ca-certificates
 
-RUN curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
-
-RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee /etc/apt/sources.list.d/google-cloud-sdk.list > /dev/null
-
 RUN apt-get update && apt-get install -y google-cloud-sdk
+
+RUN gcloud auth activate-service-account --key-file=/app/credentials.json
 
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
     /bin/bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda && \
