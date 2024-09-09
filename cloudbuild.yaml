@@ -10,8 +10,15 @@ steps:
 
         # Authenticate with GitHub CLI
         echo "${gcloud secrets versions access latest --secret=GITHUB_TOKEN}" | gh auth login --with-token
-        # Decode the base64 secret and save it as credentials.json
-        echo "$(gh secret view CREDENTIALS_JSON --repo talshem/software --json value -q '.value')" | base64 --decode > credentials.json
+
+  # Decode the base64 CREDENTIALS_JSON environment variable and save it as credentials.json
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "${CREDENTIALS_JSON}" | base64 --decode > credentials.json
+
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -20,6 +27,7 @@ steps:
         gcloud auth activate-service-account --key-file=credentials.json
         gcloud auth list
         gcloud config list
+
   # Build the Docker image with build arguments
   - name: 'gcr.io/cloud-builders/docker'
     args:
