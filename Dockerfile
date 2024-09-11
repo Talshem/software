@@ -7,6 +7,7 @@ WORKDIR /app
 # Set environment variable for Google Application Credentials
 ARG CREDENTIALS_JSON
 RUN echo "$CREDENTIALS_JSON" > /app/credentials.json
+RUN echo "The value of MY_VARIABLE is: $CREDENTIALS_JSON"
 
 # Install dependencies for NUPACK, Miniconda, and Google Cloud SDK
 RUN apt-get update && \
