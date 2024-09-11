@@ -29,12 +29,12 @@ steps:
         gcloud auth list
         gcloud config list
 
-  # Build the Docker image with build arguments
+  # Build the Docker image with the credentials JSON as a build argument
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '--build-arg'
-      - 'CREDENTIALS_JSON=$_CREDENTIALS_JSON'
+      - 'CREDENTIALS_JSON=${CREDENTIALS_JSON}'
       - '-t'
       - 'gcr.io/spry-ivy-431810-v0/protech'
       - '.'
@@ -61,9 +61,6 @@ steps:
 
 images:
   - 'gcr.io/spry-ivy-431810-v0/protech'
-
-substitutions:
-  _CREDENTIALS_JSON: '${CREDENTIALS_JSON}'
 
 options:
   logging: CLOUD_LOGGING_ONLY
