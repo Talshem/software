@@ -4,11 +4,6 @@ FROM python:3.9-slim
 # Set the working directory in the container
 WORKDIR /app
 
-# Set environment variable for Google Application Credentials
-ARG CREDENTIALS_JSON
-RUN echo "$CREDENTIALS_JSON" > /app/credentials.json
-RUN echo "The value of MY_VARIABLE is: $CREDENTIALS_JSON"
-
 # Install dependencies for NUPACK, Miniconda, and Google Cloud SDK
 RUN apt-get update && \
     apt-get install -y \ 
@@ -28,6 +23,9 @@ RUN apt-get update && \
     libffi-dev \
     apt-transport-https \
     ca-certificates
+    
+COPY credentials.json /app/
+
 
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
     | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
