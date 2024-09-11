@@ -1,42 +1,31 @@
 steps:
-  # Retrieve the GitHub token from Secret Manager
+  # Clone the repository to get the credentials.json file
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        apt-get update && apt-get install -y gh
+        # Install git if necessary
+        apt-get update && apt-get install -y git
 
-        # Retrieve the GitHub token from Secret Manager
-        GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")
+        # Clone the repository to get credentials.json
+        git clone https://github.com/talshem/software.git /workspace/repo
+        cp /workspace/repo/credentials.json /workspace/credentials.json
 
-        # Authenticate with GitHub CLI using the retrieved token
-        echo "$GITHUB_TOKEN" | gh auth login --with-token
-        
-  # Decode the base64 CREDENTIALS_JSON environment variable and save it as credentials.json
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "{{ env.CREDENTIALS_JSON }}" | base64 --decode > credentials.json
-        
   # Activate the service account using the credentials.json
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        gcloud auth activate-service-account --key-file=credentials.json
+        gcloud auth activate-service-account --key-file=/workspace/credentials.json
         gcloud auth list
         gcloud config list
 
-  # Build the Docker image with the credentials JSON as a build argument
+  # Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
-      - '--build-arg'
-      - 'CREDENTIALS_JSON=${env.CREDENTIALS_JSON}'
       - '-t'
       - 'gcr.io/spry-ivy-431810-v0/protech'
       - '.'
