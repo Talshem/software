@@ -11,7 +11,7 @@ RUN echo "The value of MY_VARIABLE is: $CREDENTIALS_JSON"
 
 # Install dependencies for NUPACK, Miniconda, and Google Cloud SDK
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install -y \ 
     wget \
     curl \
     unzip \
