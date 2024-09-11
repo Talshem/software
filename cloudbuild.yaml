@@ -33,7 +33,7 @@ steps:
     args:
       - 'build'
       - '--build-arg'
-      - 'CREDENTIALS_JSON=$(cat credentials.json | base64)'
+      - 'CREDENTIALS_JSON=$(cat credentials.json)'
       - '-t'
       - 'gcr.io/spry-ivy-431810-v0/protech'
       - '.'
