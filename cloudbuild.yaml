@@ -5,12 +5,14 @@ steps:
     args:
       - '-c'
       - |
-        # Install GitHub CLI (gh) if not already available
         apt-get update && apt-get install -y gh
 
-        # Authenticate with GitHub CLI
-        echo "${gcloud secrets versions access latest --secret="GITHUB_TOKEN"}" | gh auth login --with-token
+        # Retrieve the GitHub token from Secret Manager
+        GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")
 
+        # Authenticate with GitHub CLI using the retrieved token
+        echo "$GITHUB_TOKEN" | gh auth login --with-token
+        
   # Decode the base64 CREDENTIALS_JSON environment variable and save it as credentials.json
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
