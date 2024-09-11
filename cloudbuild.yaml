@@ -17,7 +17,7 @@ steps:
     args:
       - '-c'
       - |
-        echo "${CREDENTIALS_JSON}" | base64 --decode > credentials.json
+        echo "{{ env.CREDENTIALS_JSON }}" | base64 --decode > credentials.json
         export CREDENTIALS_JSON_CONTENT=$(cat credentials.json)
 
   # Activate the service account using the credentials.json
