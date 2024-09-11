@@ -48,8 +48,6 @@ steps:
       - 'gcr.io/spry-ivy-431810-v0/protech'
       - '--platform'
       - 'managed'
-      - '--region'
-      - 'us-central1'
 
 images:
   - 'gcr.io/spry-ivy-431810-v0/protech'
