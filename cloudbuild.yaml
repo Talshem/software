@@ -19,6 +19,7 @@ steps:
       - |
         echo "${CREDENTIALS_JSON}" | base64 --decode > credentials.json
 
+  # Activate the service account using the credentials.json
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -33,7 +34,7 @@ steps:
     args:
       - 'build'
       - '--build-arg'
-      - 'CREDENTIALS_JSON=$(cat credentials.json)'
+      - 'CREDENTIALS_JSON=$_CREDENTIALS_JSON'
       - '-t'
       - 'gcr.io/spry-ivy-431810-v0/protech'
       - '.'
@@ -60,6 +61,9 @@ steps:
 
 images:
   - 'gcr.io/spry-ivy-431810-v0/protech'
+
+substitutions:
+  _CREDENTIALS_JSON: '${CREDENTIALS_JSON}'
 
 options:
   logging: CLOUD_LOGGING_ONLY
