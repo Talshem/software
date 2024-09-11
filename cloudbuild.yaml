@@ -8,17 +8,17 @@ steps:
         # Install git if necessary
         apt-get update && apt-get install -y git
 
-        # Clone the repository to get credentials.json
-        git clone https://github.com/talshem/software.git /workspace/repo
-        cp /workspace/repo/credentials.json /workspace/credentials.json
-
+        GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")
+        echo "$GITHUB_TOKEN" | gh auth login --with-token
+        echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > credentials.json
+        
   # Activate the service account using the credentials.json
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        gcloud auth activate-service-account --key-file=/workspace/credentials.json
+        gcloud auth activate-service-account --key-file=/credentials.json
         gcloud auth list
         gcloud config list
 
@@ -27,6 +27,7 @@ steps:
     args:
       - 'build'
       - '-t'
+      - 'CREDENTIALS_JSON=credentials.json'
       - 'gcr.io/spry-ivy-431810-v0/protech'
       - '.'
 
