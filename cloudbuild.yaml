@@ -15,7 +15,7 @@ steps:
         gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /nupack-4.0.1.12.zip 
         unzip /nupack-4.0.1.12.zip -d /nupack-4.0.1.12
         rm /nupack-4.0.1.12.zip
-
+ 
     - name: 'python:3.10'
     id: 'Install Dependencies'
     entrypoint: 'bash'
