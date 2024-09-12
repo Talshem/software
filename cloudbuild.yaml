@@ -15,6 +15,10 @@ steps:
         gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /nupack-4.0.1.12.zip 
         unzip /nupack-4.0.1.12.zip -d /nupack-4.0.1.12
         rm /nupack-4.0.1.12.zip
+        if [ ! -d "/nupack-4.0.1.12/package" ]; then
+          echo "/nupack-4.0.1.12/package directory not found"
+          exit 1
+        fi
 
   - name: 'python:3.9-slim-buster'
     id: 'Install dependencies and run server'
