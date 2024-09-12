@@ -25,7 +25,7 @@ steps:
     args:
       - '-c'
       - |
-        pip install -U nupack -f /nupack-4.0.1.12/package
+        pip install -U nupack -f ./nupack-4.0.1.12/package
         pip install -r requirements.txt
         python tool/server.py
 
