@@ -22,37 +22,50 @@ steps:
         gcloud auth list
         gcloud config list
 
-  # Build the Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'build'
-      - '-t'
-      - 'CREDENTIALS_JSON=credentials.json'
-      - 'gcr.io/spry-ivy-431810-v0/protech'
-      - '.'
 
-  # Push the Docker image to Google Container Registry
-  - name: 'gcr.io/cloud-builders/docker'
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
     args:
-      - 'push'
-      - 'gcr.io/spry-ivy-431810-v0/protech'
+      - '-c'
+      - |
+        # Install git if necessary
+        apt-get update && apt-get install -y git
 
-  # Deploy the image to Cloud Run
+        GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")
+        echo "$GITHUB_TOKEN" | gh auth login --with-token
+        echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > credentials.json
+
+  # Activate the service account using the credentials.json
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'gcloud'
+    entrypoint: 'bash'
     args:
-      - 'run'
-      - 'deploy'
-      - 'nupack-app'
-      - '--image'
-      - 'gcr.io/spry-ivy-431810-v0/protech'
-      - '--platform'
-      - 'managed'
-      - '--region'
-      - 'us-central1'
+      - '-c'
+      - |
+        gcloud auth activate-service-account --key-file=/credentials.json
+        gcloud auth list
+        gcloud config list
 
-images:
-  - 'gcr.io/spry-ivy-431810-v0/protech'
+  # Install Python Requirements and NUPACK
+  - name: 'python:3.9-slim-buster'
+    id: 'Install NUPACK and Dependencies'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install -r requirements.txt
+        # Update package manager and install system dependencies
+        gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.12.zip /app/nupack-4.0.1.12.zip
+        # Install NUPACK
+        cd /app
+        unzip nupack-4.0.1.12.zip
+        cd nupack-4.0.1.12
+        pip install -U nupack -f ./package
 
-options:
-  logging: CLOUD_LOGGING_ONLY
+  # Run your server.py script
+  - name: 'python:3.9-slim-buster'
+    id: 'Run Server'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        python tool/server.py
