@@ -42,3 +42,6 @@ steps:
       - '-c'
       - |
         python tool/server.py
+
+options:
+  logging: CLOUD_LOGGING_ONLY
