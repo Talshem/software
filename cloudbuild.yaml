@@ -16,7 +16,7 @@ steps:
         unzip /nupack-4.0.1.12.zip -d /nupack-4.0.1.12
         rm /nupack-4.0.1.12.zip
  
-  - name: 'python:3.10'
+  - name: 'python:3.10-slim-buster'
     id: 'Install Dependencies'
     entrypoint: 'bash'
     args:
@@ -30,6 +30,7 @@ steps:
     args:
       - '-c'
       - |
+        pip install -r requirements.txt
         pip install -U nupack -f /nupack-4.0.1.12/package
         python tool/server.py
 
