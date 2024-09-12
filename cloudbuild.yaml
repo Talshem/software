@@ -15,7 +15,11 @@ steps:
         gcloud config list
         gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /app/nupack-4.0.1.12.zip
         unzip nupack-4.0.1.12.zip
-      
+        rm /nupack-4.0.1.12.zip
+        cd /app/nupack-4.0.1.12
+        pip install -U nupack -f ./package
+
+        
   # Install Python requirements and NUPACK
   - name: 'python:3.9-slim-buster'
     id: 'Install NUPACK and Dependencies'
@@ -24,8 +28,6 @@ steps:
       - '-c'
       - |
         pip install -r requirements.txt
-        cd nupack-4.0.1.12
-        pip install -U nupack -f ./package
         python tool/server.py
 
 options:
