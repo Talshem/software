@@ -26,7 +26,7 @@ app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 app.config['UPLOAD_EXTENSIONS'] = ['.fasta']
 
 client = storage.Client()
-bucket_name = 'spry-ivy-431810-v0.appspot.com'
+bucket_name = 'protech_bucket'
 bucket = client.get_bucket(bucket_name)
 blobs = bucket.list_blobs()
 
