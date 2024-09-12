@@ -1,3 +1,4 @@
+biopython
 flask
 wtforms
 flask_wtf
