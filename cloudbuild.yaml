@@ -1,51 +1,26 @@
 steps:
-  # Clone the repository to get the credentials.json file
+  # Clone the repository and configure credentials
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        # Install git if necessary
         apt-get update && apt-get install -y git
-
-        GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")
-        echo "$GITHUB_TOKEN" | gh auth login --with-token
-        echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > credentials.json
-        
-  # Activate the service account using the credentials.json
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud auth activate-service-account --key-file=/credentials.json
-        gcloud auth list
-        gcloud config list
-
-
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        # Install git if necessary
-        apt-get update && apt-get install -y git
-
         GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")
         echo "$GITHUB_TOKEN" | gh auth login --with-token
         echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > credentials.json
 
-  # Activate the service account using the credentials.json
+  # Activate the service account using credentials.json
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        gcloud auth activate-service-account --key-file=/credentials.json
+        gcloud auth activate-service-account --key-file=credentials.json
         gcloud auth list
         gcloud config list
 
-  # Install Python Requirements and NUPACK
+  # Install Python requirements and NUPACK
   - name: 'python:3.9-slim-buster'
     id: 'Install NUPACK and Dependencies'
     entrypoint: 'bash'
@@ -53,15 +28,13 @@ steps:
       - '-c'
       - |
         pip install -r requirements.txt
-        # Update package manager and install system dependencies
-        gsutil cp gs://spry-ivy-431810-v0.appspot.com/nupack-4.0.1.12.zip /app/nupack-4.0.1.12.zip
-        # Install NUPACK
+        gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /app/nupack-4.0.1.12.zip
         cd /app
         unzip nupack-4.0.1.12.zip
         cd nupack-4.0.1.12
         pip install -U nupack -f ./package
 
-  # Run your server.py script
+  # Run server.py
   - name: 'python:3.9-slim-buster'
     id: 'Run Server'
     entrypoint: 'bash'
