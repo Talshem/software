@@ -10,11 +10,11 @@ steps:
         echo "$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")" | gh auth login --with-token
         echo "${{ secrets.CREDENTIALS_JSON }}"
         echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > /credentials.json 
-        cat credentials.json  # Print the decoded credentials.json
-        gcloud auth activate-service-account --key-file=credentials.json
+        cat /credentials.json  # Print the decoded credentials.json
+        gcloud auth activate-service-account --key-file=/credentials.json
         gcloud auth list
         gcloud config list
-        gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /nupack-4.0.1.12.zip 
+        gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip -d /nupack-4.0.1.12.zip 
         unzip nupack-4.0.1.12.zip -d /nupack-4.0.1.12
         rm /nupack-4.0.1.12.zip
         cd /nupack-4.0.1.12
