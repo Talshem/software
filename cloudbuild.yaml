@@ -33,6 +33,6 @@ steps:
         pip install -r requirements9.txt
         pip install -U nupack -f /nupack-4.0.1.12/package
         python tool/server.py
-
+        
 options:
   logging: CLOUD_LOGGING_ONLY 
