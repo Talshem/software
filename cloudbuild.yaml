@@ -28,7 +28,6 @@ steps:
       - |
         pip install -r requirements.txt
         gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /app/nupack-4.0.1.12.zip
-        cd /app
         unzip nupack-4.0.1.12.zip
         cd nupack-4.0.1.12
         pip install -U nupack -f ./package
