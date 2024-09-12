@@ -22,7 +22,7 @@ steps:
     args:
       - '-c'
       - |
-        pip install -r requirement10s.txt
+        pip install biopython
         
   - name: 'python:3.9-slim-buster'
     id: 'Install NUPACK'
