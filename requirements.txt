@@ -11,9 +11,6 @@ scipy
 matplotlib
 pandas
 jupyterlab
-wget
-curl
-unzip
 gnupg
 build-essential
 libcurl4-openssl-dev
@@ -25,5 +22,3 @@ libncurses5-dev
 libsqlite3-dev
 libreadline-dev
 libffi-dev
-apt-transport-https
-ca-certificates
