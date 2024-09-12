@@ -5,10 +5,9 @@ steps:
     args:
       - '-c'
       - |
-        git config --global init.defaultBranch main
+         git branch -m main
         apt-get update && apt-get install -y git unzip
         echo "$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")" | gh auth login --with-token
-        echo "${{ secrets.CREDENTIALS_JSON }}"
         echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > /credentials.json 
         gcloud auth activate-service-account --key-file=/credentials.json
         gcloud auth list
@@ -25,7 +24,7 @@ steps:
     args:
       - '-c'
       - |
-        pip install -U nupack -f ./nupack-4.0.1.12/package
+        pip install -U nupack -f /nupack-4.0.1.12/package
         pip install -r requirements.txt
         python tool/server.py
 
