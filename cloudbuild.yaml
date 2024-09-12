@@ -5,20 +5,17 @@ steps:
     args:
       - '-c'
       - |
-        apt-get update && apt-get install -y git unzip gh
+        apt-get update && apt-get install -y git unzip
         echo "$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")" | gh auth login --with-token
+        echo "${{ secrets.CREDENTIALS_JSON }}"
         echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > credentials.json 
-
-  # Activate the service account using credentials.json
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
+        cat credentials.json  # Print the decoded credentials.json
         gcloud auth activate-service-account --key-file=credentials.json
         gcloud auth list
         gcloud config list
-
+        gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /app/nupack-4.0.1.12.zip
+        unzip nupack-4.0.1.12.zip
+      
   # Install Python requirements and NUPACK
   - name: 'python:3.9-slim-buster'
     id: 'Install NUPACK and Dependencies'
@@ -27,8 +24,6 @@ steps:
       - '-c'
       - |
         pip install -r requirements.txt
-        gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /app/nupack-4.0.1.12.zip
-        unzip nupack-4.0.1.12.zip
         cd nupack-4.0.1.12
         pip install -U nupack -f ./package
 
