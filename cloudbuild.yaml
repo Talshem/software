@@ -8,7 +8,7 @@ steps:
         apt-get update && apt-get install -y git
         GITHUB_TOKEN=$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")
         echo "$GITHUB_TOKEN" | gh auth login --with-token
-        echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > credentials.json
+        echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > credentials.json 
 
   # Activate the service account using credentials.json
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
