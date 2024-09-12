@@ -16,7 +16,7 @@ steps:
         unzip /nupack-4.0.1.12.zip -d /nupack-4.0.1.12
         rm /nupack-4.0.1.12.zip
 
-   - name: 'python:3.10-slim-buster'
+  - name: 'python:3.10-slim-buster'
     id: 'Install biopython'
     entrypoint: 'bash'
     args:
