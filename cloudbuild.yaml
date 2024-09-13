@@ -15,10 +15,23 @@ steps:
         gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /nupack-4.0.1.12.zip 
         unzip /nupack-4.0.1.12.zip -d /nupack-4.0.1.12
         rm /nupack-4.0.1.12.zip
-        if [ ! -d "/nupack-4.0.1.12/package" ]; then
-          echo "/nupack-4.0.1.12/package directory not found"
-          exit 1
-        fi
+
+ # Step 1: Install Miniconda
+  - name: 'ubuntu'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+        /bin/bash Miniconda3-latest-Linux-x86_64.sh -b
+        miniconda3/bin/conda update -n base -c defaults conda
+        rm Miniconda3-latest-Linux-x86_64.sh
+
+        export PATH=$HOME/miniconda3/bin:$PATH
+        echo 'export PATH=$HOME/miniconda3/bin:$PATH' >> ~/.bashrc
+
+        conda install numpy scipy pip matplotlib pandas jupyterlab
+        pip install -U nupack -f ./nupack-4.0.1.12/package
 
   - name: 'python:3.9-slim-buster'
     id: 'Install dependencies and run server'
@@ -27,7 +40,6 @@ steps:
       - '-c'
       - |
         pip install -r requirements.txt
-        pip install -U nupack -f /nupack-4.0.1.12/package
         python tool/server.py
         
 options:
