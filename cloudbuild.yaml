@@ -29,7 +29,7 @@ steps:
         /miniconda3/bin/conda update -n base -c defaults conda
         rm Miniconda3-latest-Linux-x86_64.sh
         /miniconda3/bin/conda install numpy scipy pip matplotlib pandas jupyterlab
-        /miniconda3/bin/pip install -U nupack -f ./nupack-4.0.1.12/package
+        /miniconda3/bin/pip install -U nupack -f /nupack-4.0.1.12/package
 
  # Install Requirements and run Server
   - name: 'python:3.9-slim-buster'
