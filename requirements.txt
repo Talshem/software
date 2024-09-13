@@ -7,7 +7,5 @@ google-cloud-storage
 viennarna
 numpy
 scipy
-matplotlib
 pandas
-jupyterlab
 tqdm
