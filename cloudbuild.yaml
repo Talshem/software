@@ -16,7 +16,7 @@ steps:
         unzip /nupack-4.0.1.12.zip -d /nupack-4.0.1.12
         rm /nupack-4.0.1.12.zip
 
- # Step 1: Install Miniconda
+ # Install Miniconda and Nupack
   - name: 'ubuntu'
     entrypoint: 'bash'
     args:
@@ -26,13 +26,12 @@ steps:
         /bin/bash Miniconda3-latest-Linux-x86_64.sh -b
         miniconda3/bin/conda update -n base -c defaults conda
         rm Miniconda3-latest-Linux-x86_64.sh
-
         export PATH=$HOME/miniconda3/bin:$PATH
         echo 'export PATH=$HOME/miniconda3/bin:$PATH' >> ~/.bashrc
-
         conda install numpy scipy pip matplotlib pandas jupyterlab
         pip install -U nupack -f ./nupack-4.0.1.12/package
 
+ # Install Requirements and run Server
   - name: 'python:3.9-slim-buster'
     id: 'Install dependencies and run server'
     entrypoint: 'bash'
