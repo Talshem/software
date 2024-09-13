@@ -24,7 +24,7 @@ steps:
       - |
         wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
         /bin/bash Miniconda3-latest-Linux-x86_64.sh -b
-        miniconda3/bin/conda update -n base -c defaults conda
+        /miniconda3/bin/conda update -n base -c defaults conda
         rm Miniconda3-latest-Linux-x86_64.sh
         /miniconda3/bin/conda install numpy scipy pip matplotlib pandas jupyterlab
         /miniconda3/bin/pip install -U nupack -f ./nupack-4.0.1.12/package
