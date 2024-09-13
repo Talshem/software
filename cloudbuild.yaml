@@ -5,7 +5,7 @@ steps:
     args:
       - '-c'
       - |
-        apt-get update && apt-get install -y git unzip wget
+        apt-get update && apt-get install -y wget git unzip
         echo "$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")" | gh auth login --with-token
         echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > /credentials.json 
         gcloud auth activate-service-account --key-file=/credentials.json
