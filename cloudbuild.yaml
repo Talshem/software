@@ -42,4 +42,4 @@ steps:
         python tool/server.py
         
 options:
-  logging: CLOUD_LOGGING_ONLY 
+  logging: CLOUD_LOGGING_ONLY  
