@@ -4,7 +4,6 @@ wtforms
 flask_wtf
 werkzeug
 google-cloud-storage
-viennarna
 tqdm
 numpy
 scipy
