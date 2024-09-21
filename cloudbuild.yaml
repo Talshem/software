@@ -28,22 +28,14 @@ steps:
         wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
         /bin/bash Miniconda3-latest-Linux-x86_64.sh -b -p /miniconda3
         /miniconda3/bin/conda update -n base -c defaults conda
+        /miniconda3/bin/activate base
         rm Miniconda3-latest-Linux-x86_64.sh
         /miniconda3/bin/conda install numpy scipy pip matplotlib pandas jupyterlab
         ls /workspace/nupack-4.0.1.12
         /miniconda3/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/nupack-4.0.1.12/package
-        /miniconda3/bin/pip install viennarna
-        
- # Install Requirements and run Server
-  - name: 'python:3.9-slim-buster'
-    id: 'Install dependencies and run server'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        source /miniconda3/bin/activate base
-        pip install -r requirements.txt
+        /miniconda3/bin/pip install viennarna 
+        /miniconda3/bin/pip install -r requirements.txt
         python tool/server.py
-        
+
 options:
   logging: CLOUD_LOGGING_ONLY  
