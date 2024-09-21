@@ -33,7 +33,7 @@ steps:
         source /miniconda3/bin/activate myenv
         /miniconda3/bin/conda install numpy scipy pip matplotlib pandas jupyterlab
         ls /workspace/nupack-4.0.1.12
-        /miniconda3/bin/pip install -U nupack -f /nupack-4.0.1.12/nupack-4.0.1.12/package
+        /miniconda3/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/nupack-4.0.1.12/package
         /miniconda3/bin/pip install biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA
         python tool/server.py
 
