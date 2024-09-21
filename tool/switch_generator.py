@@ -1,5 +1,5 @@
 from typing import Tuple
-from viennaRNA import mfe
+from RNA import mfe
 
 from nupack import *
 config.threads = 8
