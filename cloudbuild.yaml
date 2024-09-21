@@ -27,10 +27,10 @@ steps:
         apt-get update && apt-get install -y wget g++
         wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -P /workspace
         /bin/bash /workspace/Miniconda3-latest-Linux-x86_64.sh -b -p /miniconda3
+        /miniconda3/bin/conda update -c defaults conda
         rm Miniconda3-latest-Linux-x86_64.sh
         /miniconda3/bin/conda create -n myenv python=3.9 -
         source /miniconda3/bin/activate myenv
-        /miniconda3/bin/conda update -n myenv -c defaults conda
         /miniconda3/bin/conda install numpy scipy pip matplotlib pandas jupyterlab
         ls /workspace/nupack-4.0.1.12
         /miniconda3/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/package
