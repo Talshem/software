@@ -5,8 +5,3 @@ flask_wtf
 werkzeug
 google-cloud-storage
 tqdm
-numpy
-scipy
-pip
-matplotlib
-pandas
