@@ -41,6 +41,7 @@ steps:
     args:
       - '-c'
       - |
+        source /miniconda3/bin/activate base
         pip install -r requirements.txt
         python tool/server.py
         
