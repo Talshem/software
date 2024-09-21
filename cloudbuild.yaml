@@ -33,6 +33,7 @@ steps:
         ls /workspace/nupack-4.0.1.12
         /miniconda3/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/nupack-4.0.1.12/package
         /miniconda3/bin/pip install -r requirements.txt
+        /miniconda3/bin/activate base
         /miniconda3/bin/python tool/server.py
 
 options:
