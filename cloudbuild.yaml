@@ -5,11 +5,11 @@ steps:
     args:
       - '-c'
       - |
-        apt-get update && apt-get install -y git unzip
+        apt-get update && apt-get install -y git gh unzip
         git config --global init.defaultBranch main
         git branch -m main
         echo "$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")" | gh auth login --with-token
-        echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > /credentials.json 
+        echo "$CREDENTIALS_JSON" | base64 -d > /credentials.json 
         gcloud auth activate-service-account --key-file=/credentials.json
         gcloud auth list
         gcloud config list
