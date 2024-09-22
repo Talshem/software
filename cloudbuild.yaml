@@ -36,7 +36,7 @@ steps:
         ls /workspace/nupack-4.0.1.12
         /miniconda3/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/package
         /miniconda3/bin/pip install biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA
-        /miniconda3/bin/python /tool/server.py
+        /miniconda3/bin/python /workspace/tool/server.py
 
 options:
   logging: CLOUD_LOGGING_ONLY  
