@@ -34,7 +34,7 @@ steps:
         /miniconda3/bin/conda install bioconda viennarna numpy scipy pip matplotlib pandas jupyterlab        
         /miniconda3/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/package
         /miniconda3/bin/pip install biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA
-        /miniconda3/bin/pip freeze
+        ls /miniconda3/bin
         /miniconda3/bin/python /workspace/tool/server.py
 
 options:
