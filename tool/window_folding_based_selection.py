@@ -8,7 +8,7 @@ import requests
 from Bio import SeqIO
 from Bio.Seq import Seq
 from tqdm import tqdm
-from ViennaRNA import rnaUp
+from ViennaRNA import RNAup
 
 WINDOW_SIZE = 23
 CONTEXT_WINDOW_SIZE = 50
