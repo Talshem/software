@@ -8,7 +8,6 @@ import requests
 from Bio import SeqIO
 from Bio.Seq import Seq
 from tqdm import tqdm
-from ViennaRNA import RNAup
 
 WINDOW_SIZE = 23
 CONTEXT_WINDOW_SIZE = 50
@@ -17,7 +16,7 @@ WINDOWS_COUNT = 1000
 def run_rna_up(sequence1, sequence2):
     try:
         return subprocess.check_output(
-            ["RNAup", "-d", "2", "--noLP", "--include_both", "-c", "'S'"],
+            ["/miniconda3/envs/myenv/bin/RNAup", "-d", "2", "--noLP", "--include_both", "-c", "'S'"],
             universal_newlines=True,
             input=f"{sequence1}&{sequence2}",
             text=True
