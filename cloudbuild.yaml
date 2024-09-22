@@ -42,6 +42,7 @@ steps:
         ls /miniconda3/bin
         ls /miniconda3/envs
         ls /miniconda3/envs/myenv
+        ls /miniconda3/envs/myenv/bin
         /miniconda3/bin/python /workspace/tool/server.py
 
 options:
