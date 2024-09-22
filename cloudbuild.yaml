@@ -31,7 +31,12 @@ steps:
         rm Miniconda3-latest-Linux-x86_64.sh
         /miniconda3/bin/conda create -n myenv python=3.9 -y
         source /miniconda3/bin/activate myenv
-        /miniconda3/bin/conda install bioconda viennarna numpy scipy pip matplotlib pandas jupyterlab        
+        /miniconda3/bin/conda config --add channels defaults
+        /miniconda3/bin/conda config --add channels bioconda
+        /miniconda3/bin/conda config --add channels conda-forge
+        /miniconda3/bin/conda config --set channel_priority strict
+        /miniconda3/bin/conda install bioconda numpy scipy pip matplotlib pandas jupyterlab        
+        /miniconda3/bin/conda install viennarna
         /miniconda3/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/package
         /miniconda3/bin/pip install biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA
         ls /miniconda3/bin
