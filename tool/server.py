@@ -13,8 +13,8 @@ from flask_wtf.file import FileField
 from wtforms import StringField, TextAreaField, SubmitField
 from werkzeug.utils import secure_filename
 import re
-from window_folding_based_selection import get_potential_windows_scores
-from switch_generator import SwitchGenerator
+# from window_folding_based_selection import get_potential_windows_scores
+# from switch_generator import SwitchGenerator
 from google.cloud import storage
 
 
