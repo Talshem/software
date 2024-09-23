@@ -118,93 +118,93 @@ if __name__ == '__main__' :
     app.run(debug=True, port=3000)
 
 
-# TODO: generic_process_file function, implement with biopython ? consider run time and memory usage.
-def generic_process_file(uploaded_file):
-    # create dictionary to store faste date from file
-    fasta_dict = {}
-    if uploaded_file:
-        filename = secure_filename(uploaded_file.filename)
-        file_ext = os.path.splitext(filename)[1]
-        if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
-            abort(400)
-        else:
-            header = ''
-            for line in uploaded_file:
-                try:
-                    line = line.decode('utf-8').strip()
-                    if line.startswith('>'):
-                        header = line
-                        fasta_dict[header] = ''
-                        continue
-                    else:
-                        line = line.upper()
-                        if validate_sequence(line):
-                            fasta_dict[header] += line.strip().upper()
-                except ValueError as e:
-                    return str(e)
+# # TODO: generic_process_file function, implement with biopython ? consider run time and memory usage.
+# def generic_process_file(uploaded_file):
+#     # create dictionary to store faste date from file
+#     fasta_dict = {}
+#     if uploaded_file:
+#         filename = secure_filename(uploaded_file.filename)
+#         file_ext = os.path.splitext(filename)[1]
+#         if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
+#             abort(400)
+#         else:
+#             header = ''
+#             for line in uploaded_file:
+#                 try:
+#                     line = line.decode('utf-8').strip()
+#                     if line.startswith('>'):
+#                         header = line
+#                         fasta_dict[header] = ''
+#                         continue
+#                     else:
+#                         line = line.upper()
+#                         if validate_sequence(line):
+#                             fasta_dict[header] += line.strip().upper()
+#                 except ValueError as e:
+#                     return str(e)
 
-            if not fasta_dict:
-                return None
-    return fasta_dict
+#             if not fasta_dict:
+#                 return None
+#     return fasta_dict
 
-def generate_switch(cell_type, trigger, reporter_gene):
-    # blob = bucket.blob(cell_type)
-    # content = blob.download_as_text()
-    optional_triggers = get_potential_windows_scores(trigger)
-    optimal_trigger = max(optional_triggers, key=optional_triggers.get)
-    switch_generator = SwitchGenerator(reporter_gene, cell_type)
-    switch = switch_generator.get_switch(optimal_trigger)          
-    # send_email(email, "Results", f"Your switch is: {switch}")
-    return switch
+# def generate_switch(cell_type, trigger, reporter_gene):
+#     # blob = bucket.blob(cell_type)
+#     # content = blob.download_as_text()
+#     optional_triggers = get_potential_windows_scores(trigger)
+#     optimal_trigger = max(optional_triggers, key=optional_triggers.get)
+#     switch_generator = SwitchGenerator(reporter_gene, cell_type)
+#     switch = switch_generator.get_switch(optimal_trigger)          
+#     # send_email(email, "Results", f"Your switch is: {switch}")
+#     return switch
 
-def validate_sequence(sequence):
-    if not re.search(r"^[ACGT]", sequence):
-        raise ValueError("Invalid sequence: must contain only A, C, G, or T nucleotides.")
+# def validate_sequence(sequence):
+#     if not re.search(r"^[ACGT]", sequence):
+#         raise ValueError("Invalid sequence: must contain only A, C, G, or T nucleotides.")
 
-    return sequence
+#     return sequence
 
 
-# TODO: generic_process_file function, implement with biopython ? consider run time and memory usage.
-def generic_process_file(uploaded_file):
-    # create dictionary to store faste date from file
-    fasta_dict = {}
-    if uploaded_file:
-        filename = secure_filename(uploaded_file.filename)
-        file_ext = os.path.splitext(filename)[1]
-        if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
-            abort(400)
-        else:
-            header = ''
-            for line in uploaded_file:
-                try:
-                    line = line.decode('utf-8').strip()
-                    if line.startswith('>'):
-                        header = line
-                        fasta_dict[header] = ''
-                        continue
-                    else:
-                        line = line.upper()
-                        if validate_sequence(line):
-                            fasta_dict[header] += line.strip().upper()
-                except ValueError as e:
-                    return str(e)
+# # TODO: generic_process_file function, implement with biopython ? consider run time and memory usage.
+# def generic_process_file(uploaded_file):
+#     # create dictionary to store faste date from file
+#     fasta_dict = {}
+#     if uploaded_file:
+#         filename = secure_filename(uploaded_file.filename)
+#         file_ext = os.path.splitext(filename)[1]
+#         if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
+#             abort(400)
+#         else:
+#             header = ''
+#             for line in uploaded_file:
+#                 try:
+#                     line = line.decode('utf-8').strip()
+#                     if line.startswith('>'):
+#                         header = line
+#                         fasta_dict[header] = ''
+#                         continue
+#                     else:
+#                         line = line.upper()
+#                         if validate_sequence(line):
+#                             fasta_dict[header] += line.strip().upper()
+#                 except ValueError as e:
+#                     return str(e)
 
-            if not fasta_dict:
-                return None
-    return fasta_dict
+#             if not fasta_dict:
+#                 return None
+#     return fasta_dict
 
-def generate_switch(cell_type, trigger, reporter_gene):
-    # blob = bucket.blob(cell_type)
-    # content = blob.download_as_text()
-    optional_triggers = get_potential_windows_scores(trigger)
-    optimal_trigger = max(optional_triggers, key=optional_triggers.get)
-    switch_generator = SwitchGenerator(reporter_gene, cell_type)
-    switch = switch_generator.get_switch(optimal_trigger)          
-    # send_email(email, "Results", f"Your switch is: {switch}")
-    return switch
+# def generate_switch(cell_type, trigger, reporter_gene):
+#     # blob = bucket.blob(cell_type)
+#     # content = blob.download_as_text()
+#     optional_triggers = get_potential_windows_scores(trigger)
+#     optimal_trigger = max(optional_triggers, key=optional_triggers.get)
+#     switch_generator = SwitchGenerator(reporter_gene, cell_type)
+#     switch = switch_generator.get_switch(optimal_trigger)          
+#     # send_email(email, "Results", f"Your switch is: {switch}")
+#     return switch
 
-def validate_sequence(sequence):
-    if not re.search(r"^[ACGT]", sequence):
-        raise ValueError("Invalid sequence: must contain only A, C, G, or T nucleotides.")
+# def validate_sequence(sequence):
+#     if not re.search(r"^[ACGT]", sequence):
+#         raise ValueError("Invalid sequence: must contain only A, C, G, or T nucleotides.")
 
-    return sequence
+#     return sequence
