@@ -30,7 +30,7 @@ steps:
         /miniconda3/bin/conda update -c defaults conda
         rm Miniconda3-latest-Linux-x86_64.sh
         /miniconda3/bin/conda create -n myenv python=3.9 -y
-        source /miniconda3/bin/activate myenv
+        /miniconda3/bin/activate myenv
         /miniconda3/bin/conda config --add channels defaults
         /miniconda3/bin/conda config --add channels bioconda
         /miniconda3/bin/conda config --add channels conda-forge
