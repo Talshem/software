@@ -114,8 +114,7 @@ def internal_error(e):
     return render_template("500.html"), 500
 
 if __name__ == '__main__' :
-    app.run(debug=True, port=8080)
-
+        app.run(host="0.0.0.0", port=8080)
 
 # # TODO: generic_process_file function, implement with biopython ? consider run time and memory usage.
 # def generic_process_file(uploaded_file):
