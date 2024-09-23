@@ -18,7 +18,7 @@ steps:
         rm /workspace/nupack-4.0.1.12.zip
 
  # Install Miniconda and Nupack
-   - name: 'ubuntu'
+  - name: 'ubuntu'
     entrypoint: 'bash'
     args:
       - '-c'
