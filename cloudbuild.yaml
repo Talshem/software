@@ -39,10 +39,26 @@ steps:
         /miniconda3/bin/conda install viennarna
         /miniconda3/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/package
         /miniconda3/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA
-        echo "Gunicorn command starting now"
-        /miniconda3/bin/gunicorn -w 4 --threads 2 -b 0.0.0.0:8080 tool.server:app
-        echo "Gunicorn command executed"
-
+        /miniconda3/bin/gunicorn --bind 0.0.0.0:8080 tool.server:app
+        
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/protech-new-435412D/software', '.']
+  
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/protech-new-435412/software']
+  
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run deploy software \
+        --image gcr.io/protech-new-435412/software \
+        --platform managed \
+        --region us-central1 \
+        --allow-unauthenticated \
+        --memory 512Mi
+  
         
 options:
   logging: CLOUD_LOGGING_ONLY  
