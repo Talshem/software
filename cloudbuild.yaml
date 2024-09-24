@@ -48,7 +48,8 @@ steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args: ['run', 'deploy', 'software', '--image', 'gcr.io/protech-new-435412/software', '--region', 'us-central1']
-  images:
+    
+images:
   - gcr.io/protech-new-435412/software
   
 options:
