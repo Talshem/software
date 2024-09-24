@@ -44,7 +44,7 @@ steps:
     args: ['build', '-t', 'gcr.io/protech-new-435412/software', '-f', 'Dockerfile', '.']
     
   - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/protech-new-435412/software']
+    args: ['push', 'gcr.io/protech-new-435412/software']
   
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
