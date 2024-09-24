@@ -17,7 +17,7 @@ steps:
         unzip /workspace/nupack-4.0.1.12.zip -d /workspace
         rm /workspace/nupack-4.0.1.12.zip
 
- # Install Miniconda and Nupack
+  # Install Miniconda and NUPACK
   - name: 'ubuntu'
     entrypoint: 'bash'
     args:
@@ -30,7 +30,7 @@ steps:
         /miniconda3/bin/conda update -c defaults conda
         rm Miniconda3-latest-Linux-x86_64.sh
         /miniconda3/bin/conda create -n myenv python=3.9 -y
-        /miniconda3/bin/activate myenv
+        source /miniconda3/bin/activate myenv
         /miniconda3/bin/conda config --add channels defaults
         /miniconda3/bin/conda config --add channels bioconda
         /miniconda3/bin/conda config --add channels conda-forge
@@ -39,14 +39,15 @@ steps:
         /miniconda3/bin/conda install viennarna
         /miniconda3/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/package
         /miniconda3/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA
-        /miniconda3/bin/gunicorn --bind 0.0.0.0:8080 tool.server:app
-        
+
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/protech-new-435412D/software', '.']
-  
+    args: ['build', '-t', 'gcr.io/protech-new-435412/software', '-f', 'Dockerfile', '.']
+
+  # Push the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/protech-new-435412/software']
-  
+
+  # Deploy to Google Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -58,7 +59,6 @@ steps:
         --region us-central1 \
         --allow-unauthenticated \
         --memory 512Mi
-  
-        
+
 options:
   logging: CLOUD_LOGGING_ONLY  
