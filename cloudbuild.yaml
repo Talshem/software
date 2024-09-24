@@ -55,7 +55,7 @@ steps:
     - 'gcr.io/protech-new-435412/software'
     - '--region'
     - 'us-central1'
-    
+  
   images:
   - 'gcr.io/protech-new-435412/software'
   
