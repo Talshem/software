@@ -8,11 +8,10 @@ steps:
         apt-get update && apt-get install -y git unzip
         git config --global init.defaultBranch main
         git branch -m main
+        gcloud config set project protech-new-435412
         echo "$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")" | gh auth login --with-token
         echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > /credentials.json 
         gcloud auth activate-service-account --key-file=/credentials.json
-        gcloud auth list
-        gcloud config list
         gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /workspace/nupack-4.0.1.12.zip 
         unzip /workspace/nupack-4.0.1.12.zip -d /workspace
         rm /workspace/nupack-4.0.1.12.zip
@@ -41,22 +40,24 @@ steps:
         /miniconda3/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA
         
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '--platform=linux/amd64', '-t', 'gcr.io/protech-new-435412/software', '-f', 'Dockerfile', '.']
+    args: ['build', '--platform=linux/amd64', '-t', 'gcr.io/protech-new-435412/software', '.']
     
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/protech-new-435412/software']
-  
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud run deploy software \
-        --image gcr.io/protech-new-435412/software \
-        --platform managed \
-        --region us-central1 \
-        --allow-unauthenticated \
-        --memory 512Mi
 
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+    - 'run'
+    - 'deploy'
+    - 'software'
+    - '--image'
+    - 'gcr.io/protech-new-435412/software'
+    - '--region'
+    - 'us-central1'
+    
+  images:
+  - 'gcr.io/protech-new-435412/software'
+  
 options:
   logging: CLOUD_LOGGING_ONLY  
