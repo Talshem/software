@@ -49,7 +49,7 @@ steps:
     entrypoint: gcloud
     args: ['run', 'deploy', 'software', '--image', 'gcr.io/protech-new-435412/software', '--region', 'us-central1']
   images:
-  - gcr.io/PROJECT_ID/IMAGE
+  - gcr.io/protech-new-435412/software
   
 options:
   logging: CLOUD_LOGGING_ONLY  
