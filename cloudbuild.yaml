@@ -43,22 +43,5 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/protech-new-435412/software', '-f', 'Dockerfile', '.']
 
-  # Push the Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/protech-new-435412/software']
-
-  # Deploy to Google Cloud Run
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud run deploy software \
-        --image gcr.io/protech-new-435412/software \
-        --platform managed \
-        --region us-central1 \
-        --allow-unauthenticated \
-        --memory 512Mi
-
 options:
   logging: CLOUD_LOGGING_ONLY  
