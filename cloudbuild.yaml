@@ -38,15 +38,15 @@ steps:
         /workspace/miniconda3/bin/conda install viennarna
         /workspace/miniconda3/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/package
         /workspace/miniconda3/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA
-        
-  - name: 'gcr.io/cloud-builders/docker'
-    args: [
-        'build',
-        '--file', 'Dockerfile',
-        '-t', 'gcr.io/protech-new-435412/software',
-        '.'
-    ]
-    
+
+  # Build the container image
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        docker build -t gcr.io/protech-new-435412/software --file Dockerfile .
+
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/protech-new-435412/software']
 
