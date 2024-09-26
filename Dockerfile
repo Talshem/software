@@ -1,8 +1,8 @@
 FROM python:3.9-slim
 
-WORKDIR /workspace
+WORKDIR /app
 
-RUN ls
+COPY /workspace .
 
 EXPOSE 8080
 
