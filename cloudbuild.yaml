@@ -40,7 +40,12 @@ steps:
         /workspace/miniconda3/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA
         
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '--platform=linux/amd64', '-t', 'gcr.io/protech-new-435412/software', '-f', 'Dockerfile', '.']
+    args: [
+        'build',
+        '--file', 'Dockerfile',
+        '-t', 'gcr.io/protech-new-435412/software',
+        '.'
+    ]
     
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/protech-new-435412/software']
