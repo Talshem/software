@@ -1,50 +1,68 @@
+# Email configuration
+import os
 import smtplib
+from email import encoders
+from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
+from io import BytesIO
+
+import pandas as pd
+
+SMTP_SERVER = 'smtp.gmail.com'
+SMTP_PORT = 587
+EMAIL_ADDRESS = 'erlichnet57@gmail.com'
+EMAIL_PASSWORD = "bzkb uqbp ykgs dkqc"
+
+def send_email_with_attachment(to_email, results_df):
+    subject = 'ProTech WebTool Report'
+    body = 'Please find the attached Excel file with the results of your analysis.'
+    msg = MIMEMultipart()
+    msg['From'] = EMAIL_ADDRESS
+    msg['To'] = to_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    # Convert DataFrame to Excel in-memory using BytesIO
+    excel_buffer = BytesIO()
+    results_df.to_excel(excel_buffer, index=False, engine='xlsxwriter')  # Write the DataFrame to buffer
+    excel_buffer.seek(0)  # Move the cursor back to the beginning of the buffer
 
 
+    # Attach the Excel file in memory to the email
+    part = MIMEBase('application', 'octet-stream')
+    part.set_payload(excel_buffer.read())
+    encoders.encode_base64(part)
+    part.add_header('Content-Disposition', 'attachment', filename='results.xlsx')
+    msg.attach(part)
 
-def send_mail(email_adress: str, pdf_path: str):
-    mail_content = '''Hello,
-    Attached to this mail is a detailed PDF with the results from your switch generator job.
-    Thank You for choosing ProTech'''
+    # Send the email
+    server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+    server.starttls()  # Secure the connection
+    server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)  # Login to the email account
+    server.sendmail(EMAIL_ADDRESS, to_email, msg.as_string())  # Send the email
+    server.quit()
 
-    #The mail addresses and password
-    sender_address = '2022igemtau@gmail.com'
-    sender_pass = 'hbetlnbeubtdhwex'
-    receiver_address = email_adress
+    return
 
-    #Setup the MIME
-    message = MIMEMultipart()
-    message['From'] = sender_address
-    message['To'] = receiver_address
-    message['Subject'] = "Results from ProTech's switch generator"   #The subject line
+"""
+def send_email(results_df):
+    # Connect to the server
+    server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+    server.starttls()  # Secure the connection
+    server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)  # Login to the email account
 
-    #The body and the attachments for the mail
-    message.attach(MIMEText(mail_content, 'plain'))
+    # Send the email
+    server.send_message(results_df)
+    server.quit()
+    print("Email sent successfully!")
+"""
 
-    # open the file in bynary
-    binary_pdf = open(pdf_path, 'rb')
+# Example usage
+if __name__ == "__main__":
 
-    payload = MIMEBase('application', 'octate-stream', Name=pdf_path)
-    payload.set_payload((binary_pdf).read())
-
-    # enconding the binary into base64
-    encoders.encode_base64(payload)
-
-    # add header with pdf name
-    payload.add_header('Content-Decomposition', 'attachment', filename=pdf_path)
-    message.attach(payload)
-
-    #Create SMTP session for sending the mail
-    session = smtplib.SMTP('smtp.gmail.com', 587) #use gmail with port
-    session.starttls() #enable security
-
-    session.login(sender_address, sender_pass) #login with mail_id and password
-    text = message.as_string()
-    session.sendmail(sender_address, receiver_address, text)
-    session.quit()
-
-    return "Mail sent"
+    file = '/Users/netanelerlich/PycharmProjects/webTool/utils/path_to_your_excel_file.xlsx'
+    email = 'erlichnet57@gmail.com'
+    df = pd.read_csv(file)
+    df  = pd.DataFrame(df)
+    send_email_with_attachment(email, df)
