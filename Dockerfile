@@ -6,4 +6,6 @@ COPY . /workspace
 
 EXPOSE 8080
 
-CMD ["source /app/miniconda3/bin/activate myenv && gunicorn", "-b", "0.0.0.0:8080", "tool.python:app"]
+WORKDIR /workspace
+
+CMD ["/workspace/miniconda3/bin/gunicorn", "-b", "0.0.0.0:8080", "tool.server:app"]
