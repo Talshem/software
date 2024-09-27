@@ -11,7 +11,7 @@ steps:
         gcloud config set project protech-new-435412
         echo "$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")" | gh auth login --with-token
         echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > /workspace/tool/credentials.json 
-        gcloud auth activate-service-account --key-file=/credentials.json
+        gcloud auth activate-service-account --key-file=/workspace/tool/credentials.json
         gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /workspace/nupack-4.0.1.12.zip 
         unzip /workspace/nupack-4.0.1.12.zip -d /workspace
         rm /workspace/nupack-4.0.1.12.zip
