@@ -14,7 +14,6 @@
             align-items: center;
             text-align: center;
         }
-
         .file-drop-area {
             position: relative;
             display: flex;
@@ -60,25 +59,8 @@
             color: #007bff;
             cursor: pointer;
         }
-
         .form-group {
             position: relative;
-        }
-        .tooltiptext {
-            display: none; /* Initially hidden */
-            background-color: #555;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            position: absolute;
-            top: 0;
-            left: 10%; /* Position tooltip to the right of the label */
-            margin-left: 10px;
-            z-index: 1;
-        }
-        label:hover + .tooltiptext { /* Show the tooltip when hovering over the label */
-            display: inline-block;
-            opacity: 1;
         }
         .question-mark {
             display: inline - block;
@@ -87,33 +69,27 @@
             left: 95%;
             margin-left: 0px; /* Adjust spacing between the input field and the question mark */
             cursor: pointer;
-
             color: #007bff;
             font-weight: bold;
             position: relative;
         }
-
-
         .tooltiptext2 {
             display: none; /* Initially hidden */
             background-color: #555;
             color: #fff;
             text-align: left;
             border-radius: 0px;
-
             top: 50%; /* Position below the input box */
             left: 0%;
             white-space: nowrap;
             z-index: 1;
         }
-
         .question-mark:hover + .tooltiptext2 {
             display: none;
         }
         .question-mark-known-trigger:hover + .tooltiptext2 {
             display: none;
         }
-
         /* Hide label and description when field is disabled */
         .form-group.disabled {
             display: none;
@@ -124,64 +100,49 @@
     {% include 'navbar.html' %} <!-- Include the navbar.html template -->
     <div class="container">
         <h1>Form Submission</h1>
-        <form action="{{ url_for('user_data_getter') }}" method="post" enctype="multipart/form-data">
-            {{ input_form.hidden_tag() }} <!-- CSRF token -->
+        <form action="{{ url_for('user_data_getter') }}" method="POST" enctype="multipart/form-data">
+            {{ input_form.hidden_tag()}}
 
             <div class="form-group">
-                {{ input_form.email.label }}
-                <span class="tooltiptext">Add a valid email</span>
+                {{ input_form.email.label}}
                 {{ input_form.email(class="form-control") }}
-
             </div>
             <div class="form-group" data-toggle="tooltip">
-
-                {{ input_form.gene.label }}
-                <span class="tooltiptext">Enter the gene sequence to be analyzed.</span>
-                {{ input_form.gene(class="form-control") }}
-                <span class="question-mark">?</span> <!-- Question mark next to the label -->
+                {{ input_form.target_seq.label }}
+                {{ input_form.target_seq(class="form-control") }}
+                <span class="question-mark">?</span>
                 <span class="tooltiptext2">Additional information about the gene input</span>
             </div>
             <div class="form-group" data-toggle="tooltip" >
                 <span class="question-mark">?</span>
-                <span class="tooltiptext2">Note: in case of mutated gene, mark, add the WT gene to File and fill the Trigger section.</span>
-                {{ input_form.user_trigger(class="form-control-inline") }}
-                {{ input_form.user_trigger.label }} <!-- Label on the right -->
-
+                {{ input_form.user_trigger_bool(class="form-control-inline") }}
+                {{ input_form.user_trigger_bool.label }}
             </div>
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.trigger.label }}
-                <span class="tooltiptext">Enter the target sequence with the mutation. 15-30 nuc.</span>
                 {{ input_form.trigger(class="form-control") }}
-                <span class="question-mark">?</span> <!-- Question mark next to the label -->
-                <span class="tooltiptext2">Additional information about the trigger input</span>
+                <span class="question-mark">?</span>
             </div>
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.reporter_gene.label }}
-                <span class="tooltiptext">Enter gene to be transcribed.</span>
                 {{ input_form.reporter_gene(class="form-control") }}
-                <span class="question-mark">?</span> <!-- Question mark next to the label -->
+                <span class="question-mark">?</span>
                 <span class="tooltiptext2">Additional information about the reporter gene input</span>
-
             </div>
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.cell_type.label }}
-                <span class="tooltiptext">Specify the organism that hosts the Toehold-Target construct.</span>
                 {{ input_form.cell_type(class="form-control") }}
-                <span class="question-mark">?</span> <!-- Question mark next to the label -->
-                <span class="tooltiptext2">Additional information about the cell type input</span>
-                <span class="tooltiptext">Drop files here or click to upload</span>
-
+                <span class="question-mark">?</span>
+                <span class="tooltiptext2">A</span>
             </div>
             <div class="form-group" data-toggle="tooltip" title="File format '.fasta', Organism genome will be used in the absence of a file.">
                 {{ input_form.file.label }}
                 <div class="file-drop-area">
                     <span class="file-drop-message">Drop files here or click to upload</span>
-                    {{ input_form.file(class="form-control-file") }}
+                    {{input_form.file(class="form-control-file") }}
                 </div>
                 <div class="file-list"></div>
-
             </div>
-
             {{ input_form.submit(class="btn btn-primary") }}
         </form>
 
@@ -208,7 +169,7 @@
 
         // JavaScript to handle enabling/disabling fields based on checkbox
         document.addEventListener("DOMContentLoaded", function() {
-            var userTriggerCheckbox = document.getElementById("user_trigger");
+            var userTriggerCheckbox = document.getElementById("user_trigger_bool");
             var geneFieldGroup = document.querySelector(".form-group:nth-child(3)");
             var triggerFieldGroup = document.querySelector(".form-group:nth-child(5)");
 
