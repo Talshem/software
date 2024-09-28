@@ -26,12 +26,12 @@ app.config['MAX_CONTENT_LENGTH'] = 210 * 1024 * 1024  # 210 MB
 app.config['UPLOAD_EXTENSIONS'] = ['.fasta']
 
 
-"""
+
 client = storage.Client()
 bucket_name = 'spry-ivy-431810-v0.appspot.com'
 bucket = client.get_bucket(bucket_name)
 blobs = bucket.list_blobs()
-"""
+
 
 class InputForm(FlaskForm):
     email = StringField("Email", [DataRequired()], render_kw={"id": "email"})
