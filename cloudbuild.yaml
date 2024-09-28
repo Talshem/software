@@ -10,7 +10,7 @@ steps:
         git branch -m main
         gcloud config set project protech-new-435412
         echo "$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")" | gh auth login --with-token
-        echo "${{ secrets.CREDENTIALS_JSON }}" | base64 -d > /workspace/tool/credentials.json 
+        echo "${{secrets.CREDENTIALS_JSON}}" | base64 -d > /workspace/tool/credentials.json 
         gcloud auth activate-service-account --key-file=/workspace/tool/credentials.json
         gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /workspace/nupack-4.0.1.12.zip 
         unzip /workspace/nupack-4.0.1.12.zip -d /workspace
@@ -37,7 +37,7 @@ steps:
         /workspace/miniconda3/bin/conda install bioconda numpy scipy pip matplotlib pandas jupyterlab        
         /workspace/miniconda3/bin/conda install viennarna
         /workspace/miniconda3/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/package
-        /workspace/miniconda3/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA joblib google-cloud-storage Bio fuzzysearch
+        /workspace/miniconda3/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA joblib Bio fuzzysearch
  
 
   # Build the container image
