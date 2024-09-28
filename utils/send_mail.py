@@ -1,24 +1,23 @@
 # Email configuration
-import os
 import smtplib
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from io import BytesIO
+import base64
 
-import pandas as pd
 
 SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 587
-EMAIL_ADDRESS = 'erlichnet57@gmail.com'
-EMAIL_PASSWORD = "bzkb uqbp ykgs dkqc"
+SENDER_EMAIL_ADDRESS = 'igentau2024@gmail.com'
+EMAIL_PASSWORD = "eefg btov iwsp xzgt"
 
-def send_email_with_attachment(to_email, results_df):
+def send_email_with_attachment(results_df, to_email):
     subject = 'ProTech WebTool Report'
     body = 'Please find the attached Excel file with the results of your analysis.'
     msg = MIMEMultipart()
-    msg['From'] = EMAIL_ADDRESS
+    msg['From'] = SENDER_EMAIL_ADDRESS
     msg['To'] = to_email
     msg['Subject'] = subject
     msg.attach(MIMEText(body, 'plain'))
@@ -39,30 +38,15 @@ def send_email_with_attachment(to_email, results_df):
     # Send the email
     server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
     server.starttls()  # Secure the connection
-    server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)  # Login to the email account
-    server.sendmail(EMAIL_ADDRESS, to_email, msg.as_string())  # Send the email
+    server.login(SENDER_EMAIL_ADDRESS, EMAIL_PASSWORD)  # Login to the email account
+    server.sendmail(SENDER_EMAIL_ADDRESS, to_email, msg.as_string())  # Send the email
     server.quit()
 
     return
 
-"""
-def send_email(results_df):
-    # Connect to the server
-    server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-    server.starttls()  # Secure the connection
-    server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)  # Login to the email account
-
-    # Send the email
-    server.send_message(results_df)
-    server.quit()
-    print("Email sent successfully!")
-"""
 
 # Example usage
 if __name__ == "__main__":
+    pass
 
-    file = '/Users/netanelerlich/PycharmProjects/webTool/utils/path_to_your_excel_file.xlsx'
-    email = 'erlichnet57@gmail.com'
-    df = pd.read_csv(file)
-    df  = pd.DataFrame(df)
-    send_email_with_attachment(email, df)
+
