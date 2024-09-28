@@ -63,23 +63,21 @@
             position: relative;
         }
         .question-mark {
-            display: inline - block;
-            position: right;
-            top: 100%; /* Position below the input box */
-            left: 95%;
-            margin-left: 0px; /* Adjust spacing between the input field and the question mark */
-            cursor: pointer;
-            color: #007bff;
-            font-weight: bold;
-            position: relative;
+                margin-left: 10px; /* Adjust as needed to control space between text and question mark */
+                cursor: pointer;
+                color: #007bff;
+                font-weight: bold;
+                vertical-align: middle; /* Ensures it's aligned with the input field */
+
+
         }
         .tooltiptext2 {
             display: none; /* Initially hidden */
             background-color: #555;
             color: #fff;
-            text-align: left;
+            text-align: right;
             border-radius: 0px;
-            top: 50%; /* Position below the input box */
+            top: 100%; /* Position below the input box */
             left: 0%;
             white-space: nowrap;
             z-index: 1;
@@ -99,63 +97,106 @@
 <body>
     {% include 'navbar.html' %} <!-- Include the navbar.html template -->
     <div class="container">
-        <h1>Form Submission</h1>
-        <form action="{{ url_for('user_data_getter') }}" method="POST" enctype="multipart/form-data">
-            {{ input_form.hidden_tag()}}
+       <h1>Form Submission</h1>
+        <form action="{{ url_for('user_data_getter') }}" method="POST" enctype="multipart/form-data" novalidate>
+            {{ input_form.hidden_tag() }}
 
+            <!-- Email Field -->
             <div class="form-group">
-                {{ input_form.email.label}}
-                {{ input_form.email(class="form-control") }}
+                {{ input_form.email.label }}
+                {{ input_form.email(class="form-control" + (" is-invalid" if input_form.email.errors else ""), placeholder="Enter your email") }}
+                {% if input_form.email.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ input_form.email.errors[0] }}
+                    </div>
+                {% endif %}
             </div>
+
+            <!-- Target Sequence Field -->
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.target_seq.label }}
-                {{ input_form.target_seq(class="form-control") }}
                 <span class="question-mark">?</span>
                 <span class="tooltiptext2">Additional information about the gene input</span>
+                {{ input_form.target_seq(class="form-control" + (" is-invalid" if input_form.target_seq.errors else ""), placeholder="Enter RNA sequence") }}
+                {% if input_form.target_seq.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ input_form.target_seq.errors[0] }}
+                    </div>
+                {% endif %}
             </div>
-            <div class="form-group" data-toggle="tooltip" >
-                <span class="question-mark">?</span>
-                {{ input_form.user_trigger_bool(class="form-control-inline") }}
+
+            <!-- User Trigger Checkbox Field -->
+            <div class="form-group" data-toggle="tooltip">
                 {{ input_form.user_trigger_bool.label }}
+                <span class="question-mark">?</span>
+                <span class="tooltiptext2">file exp</span>
+                {{ input_form.user_trigger_bool(class="form-control-inline" + (" is-invalid" if input_form.user_trigger_bool.errors else "")) }}
+
             </div>
+
+            <!-- Trigger Input Field -->
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.trigger.label }}
-                {{ input_form.trigger(class="form-control") }}
                 <span class="question-mark">?</span>
+                <span class="tooltiptext2">Additional information about the trigger input</span>
+                {{ input_form.trigger(class="form-control" + (" is-invalid" if input_form.trigger.errors else ""), placeholder="Enter trigger sequence (23 nucleotides)") }}
+                {% if input_form.trigger.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ input_form.trigger.errors[0] }}
+                    </div>
+                {% endif %}
             </div>
+
+            <!-- Reporter Gene Field -->
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.reporter_gene.label }}
-                {{ input_form.reporter_gene(class="form-control") }}
                 <span class="question-mark">?</span>
                 <span class="tooltiptext2">Additional information about the reporter gene input</span>
+                {{ input_form.reporter_gene(class="form-control" + (" is-invalid" if input_form.reporter_gene.errors else ""), placeholder="Enter reporter gene") }}
+
+                {% if input_form.reporter_gene.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ input_form.reporter_gene.errors[0] }}
+                    </div>
+                {% endif %}
             </div>
+
+            <!-- Cell Type Field -->
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.cell_type.label }}
-                {{ input_form.cell_type(class="form-control") }}
                 <span class="question-mark">?</span>
-                <span class="tooltiptext2">A</span>
+                <span class="tooltiptext2">Select the organism type</span>
+
+                {{ input_form.cell_type(class="form-control" + (" is-invalid" if input_form.cell_type.errors else "")) }}
+
+                {% if input_form.cell_type.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ input_form.cell_type.errors[0] }}
+                    </div>
+                {% endif %}
             </div>
+
+            <!-- File Upload Field -->
             <div class="form-group" data-toggle="tooltip" title="File format '.fasta', Organism genome will be used in the absence of a file.">
                 {{ input_form.file.label }}
+                <span class="question-mark">?</span>
+                <span class="tooltiptext2">file exp</span>
                 <div class="file-drop-area">
                     <span class="file-drop-message">Drop files here or click to upload</span>
-                    {{input_form.file(class="form-control-file") }}
+                    {{ input_form.file(class="form-control-file" + (" is-invalid" if input_form.file.errors else "")) }}
                 </div>
                 <div class="file-list"></div>
+                {% if input_form.file.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ input_form.file.errors[0] }}
+                    </div>
+                {% endif %}
             </div>
+
+            <!-- Submit Button -->
             {{ input_form.submit(class="btn btn-primary") }}
         </form>
 
-        <!-- Feedback Section -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} mt-3">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

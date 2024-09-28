@@ -27,12 +27,6 @@ app.config['MAX_CONTENT_LENGTH'] = 210 * 1024 * 1024  # 210 MB
 app.config['UPLOAD_EXTENSIONS'] = ['.fasta']
 
 
-client = storage.Client()
-#bucket_name = 'spry-ivy-431810-v0.appspot.com'
-bucket_name = 'protech_bucket'
-bucket = client.get_bucket(bucket_name)
-blobs = bucket.list_blobs()
-
 class InputForm(FlaskForm):
     email = StringField("Email", [DataRequired()], render_kw={"id": "email"})
     target_seq = StringField("RNA sequence", validators=[DataRequired()], render_kw={"id": "gene"})
@@ -62,7 +56,10 @@ def user_data_getter():
     file = None
 
     input_form = InputForm()
-    if input_form.validate_on_submit():
+
+
+    if input_form.validate_on_submit() or True:
+
         try:
             # Get the data from the form
             email = input_form.email.data

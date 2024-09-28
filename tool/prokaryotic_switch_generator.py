@@ -85,7 +85,7 @@ class ProkaryoticSwitchGenerator:
         ], name="switch")
         stop_codon_pattern = Pattern(STOP_CODONS, scope=[~b_domain_pre_bulge])
 
-        print(self.switch_structure)
+        #print(self.switch_structure)
         switch_complex = TargetComplex([switch], self.switch_structure, name='switch complex')
 
         if healthy_sequence:

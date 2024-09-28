@@ -11,7 +11,7 @@ import base64
 
 SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 587
-SENDER_EMAIL_ADDRESS = 'igentau2024@gmail.com'
+SENDER_EMAIL_ADDRESS = 'igemtau2024@gmail.com'
 EMAIL_PASSWORD = "eefg btov iwsp xzgt"
 
 def send_email_with_attachment(results_df, to_email):
