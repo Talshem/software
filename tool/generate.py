@@ -12,7 +12,7 @@ from utils.send_mail import send_email_with_attachment as send
 from utils.seqeunce_consts import GFP_GENE
 
 
-EDIT_DIST = 5
+EDIT_DIST = 4
 TRIGGERS_BATCH = 2
 SWITCH_BATCH = 3
 
