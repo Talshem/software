@@ -3,7 +3,7 @@ import time
 from random import choice
 
 from fuzzysearch import find_near_matches
-#from suffix_trees import STree
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt

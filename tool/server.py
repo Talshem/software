@@ -15,7 +15,7 @@ import re
 from tool.window_folding_based_selection import get_potential_windows_scores
 from tool.switch_generator import SwitchGenerator
 from google.cloud import storage
-from utils.server_utils import process_file_stream
+from server_utils import process_file_stream
 import os
 
 

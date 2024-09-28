@@ -12,3 +12,8 @@ matplotlib
 pandas
 jupyterlab
 viennaRNA
+fuzzysearch
+Bio
+google-cloud-storage
+google
+joblib
