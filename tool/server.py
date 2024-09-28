@@ -12,8 +12,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash, abo
 from flask_wtf.file import FileField
 from wtforms import StringField, TextAreaField, SubmitField
 import re
-from tool.window_folding_based_selection import get_potential_windows_scores
-from tool.switch_generator import SwitchGenerator
+from window_folding_based_selection import get_potential_windows_scores
+from switch_generator import SwitchGenerator
 from google.cloud import storage
 import os
 from tool.server_utils import process_file_stream
@@ -26,11 +26,12 @@ app.config['MAX_CONTENT_LENGTH'] = 210 * 1024 * 1024  # 210 MB
 app.config['UPLOAD_EXTENSIONS'] = ['.fasta']
 
 
-
+"""
 client = storage.Client()
-bucket_name = 'protech_bucket'
+bucket_name = 'spry-ivy-431810-v0.appspot.com'
 bucket = client.get_bucket(bucket_name)
 blobs = bucket.list_blobs()
+"""
 
 class InputForm(FlaskForm):
     email = StringField("Email", [DataRequired()], render_kw={"id": "email"})
@@ -61,7 +62,7 @@ def user_data_getter():
     file = None
 
     input_form = InputForm()
-    if input_form.validate_on_submit():
+    if input_form.validate_on_submit() or True:
         try:
             # Get the data from the form
             email = input_form.email.data
@@ -71,6 +72,7 @@ def user_data_getter():
             cell_type = input_form.cell_type.data
             user_trigger_bool = input_form.user_trigger_bool.data
             uploaded_file = input_form.file.data
+
 
             # Process the file
             s_email = str(email) if email else "EMPTY"
@@ -118,6 +120,6 @@ def page_not_found(e):
 def internal_error(e):
     return render_template("500.html"), 500
 
+
 if __name__ == '__main__':
     app.run(port=3000)
-
