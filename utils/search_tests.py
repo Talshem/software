@@ -3,7 +3,7 @@ import random
 import time
 import numpy as np
 import pickle
-from seaborn import lineplot
+
 from tool.generate import find_homology
 from itertools import combinations
 import matplotlib.pyplot as plt

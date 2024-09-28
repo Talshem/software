@@ -1,4 +1,4 @@
-
+import sys
 import pickle
 import numpy as np
 import pandas as pd
@@ -10,6 +10,7 @@ from tool.prokaryotic_switch_generator import ProkaryoticSwitchGenerator
 from tool.window_folding_based_selection import get_gene_top_ranked_windows, get_mRNA_opening_mfe
 from utils.send_mail import send_email_with_attachment as send
 from utils.seqeunce_consts import GFP_GENE
+from RNA import RNA
 
 
 EDIT_DIST = 4
@@ -25,26 +26,48 @@ DATA_PATHS = {
     "Homo sapiens": HUMAN_DATA_PATH,
     "Eukaryote": YEAST_DATA_PATH
 }
+"""
+
+# for development
+E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
+HUMAN_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Homo_sapiens_GRCh38.pkl"
+YEAST_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Saccharomyces_cerevisiae_S288C.pkl"
+
+DATA_PATHS = {
+    "Prokaryote": E_COLI_DATA_PATH,
+    "Homo sapiens": HUMAN_DATA_PATH,
+    "Eukaryote": YEAST_DATA_PATH}
+"""
+
 def extract_top_homology_sequences(triggers_homology_mapping):
     homo_dfs = []
     for trigger_homology in triggers_homology_mapping:
         trigger_all_matches = []
         for gene_homology in trigger_homology:
             trigger_all_matches.extend(gene_homology.values())
-        # TODO: optional- take only top closest distance
 
         if trigger_all_matches:
             top_dist_df = pd.DataFrame(
                 sorted(trigger_all_matches[0], key=lambda single_homo_map: single_homo_map['distance']))
         else:
             top_dist_df = pd.DataFrame(columns=['distance', 'idx', 'sequence', 'gene'])
+
+
+        mfe_dict = {'homologous_trigger_mfe': []}
+        for homos in trigger_all_matches[0]:
+            homo_trigger = homos['sequence']
+            structure, mfe = RNA.fold(homo_trigger)
+            mfe_dict['homologous_trigger_mfe'].append(mfe)
+        mfe_df = pd.DataFrame(mfe_dict)
+
+        top_dist_df = pd.concat([top_dist_df, mfe_df], axis=1)
         homo_dfs.append(top_dist_df)
 
     # TODO: add expression levels
     # TODO: add opening mfe of trigger homology
     # RRF calc the best competitor:
     # higher is better - homology trigger mfe = open competing window, expression=higher more competing
-    higher = []
+    higher = ['homologous_trigger_mfe']
     # lower is better - distance= lower = more similar
     lower = ['distance']
     rrf_rank = [RRF(trigger_homology_df, higher, lower, index='sequence') for trigger_homology_df in homo_dfs]
@@ -53,9 +76,14 @@ def extract_top_homology_sequences(triggers_homology_mapping):
 def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigger_boo, transcripts_dict):
     results = pd.DataFrame()
     blob_name = DATA_PATHS[cell_type]
-
+    """
     blob = bucket.blob(blob_name)
     cell_type_transcripts = pickle.load(blob.download_as_bytes())
+    """
+
+    # for development
+    with open(blob_name, 'rb') as f:
+        cell_type_transcripts = pickle.load(f)
 
     if transcripts_dict != 'EMPTY':
         transcripts_dict = cell_type_transcripts | transcripts_dict
@@ -71,7 +99,6 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     results[['trigger_window', 'mfe_score']] = triggers_with_mfe
 
     triggers_seqs = triggers_with_mfe[:, 0]
-
     homo_res = Parallel(n_jobs=-1)(delayed(find_homology)(trigger, transcripts_dict) for trigger in triggers_seqs)
     rrf_ranks = extract_top_homology_sequences(homo_res)
     homology_sequences = [ranked_df['sequence'][0] for ranked_df in rrf_ranks]
@@ -115,6 +142,7 @@ def build_homology_map(trigger, seq, gene_name):
         sequence_match_mapping.append({'distance': distance, 'idx': seq_location, 'sequence': sub_seq, 'gene': gene_name})
     return sequence_match_mapping
 
+
 def find_homology(sequence, genome_data):
     genes_sub_sequences = []
     for gene_data_dict in genome_data:
@@ -141,9 +169,7 @@ def generate_switch(trigger, homologous_sequence, reporter_gene, cell_type):
     return switch_designed_strand, ensemble_defect,complex_concentration
 
 def prepare_and_send_report(df_results, rrf_ranks, email):
-    #print(df_results)
-    #print(rrf_ranks)
-    #print(email)
+
     combined_rows = []
     rrf_ranks = rrf_ranks.copy()
     for index, row in df_results.iterrows():
@@ -165,6 +191,8 @@ if __name__ == '__main__':
     s_cell_type = sys.argv[5]
     s_user_trigger_boo = sys.argv[6]
     s_transcripts_dict = sys.argv[7]
-    print('sent to route_input')
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_dict)
-    
+
+
+
+
