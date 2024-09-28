@@ -8,6 +8,7 @@ from io import BytesIO
 import base64
 
 
+
 SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 587
 SENDER_EMAIL_ADDRESS = 'igentau2024@gmail.com'

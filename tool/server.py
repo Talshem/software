@@ -18,18 +18,18 @@ from google.cloud import storage
 from server_utils import process_file_stream
 import os
 
-
 # Initialize the Flask app
 app = Flask(__name__, template_folder='templates', static_folder='static')
-app.config['SECRET_KEY'] = 'tami'
-csrf = CSRFProtect(app)  # Initialize CSRF protection
+csrf = CSRFProtect(app)
+csrf.init_app(app)
+app.config['SECRET_KEY'] = os.urandom(24)
 app.config['MAX_CONTENT_LENGTH'] = 210 * 1024 * 1024  # 210 MB
 app.config['UPLOAD_EXTENSIONS'] = ['.fasta']
 
 
-
 client = storage.Client()
-bucket_name = 'spry-ivy-431810-v0.appspot.com'
+#bucket_name = 'spry-ivy-431810-v0.appspot.com'
+bucket_name = 'protech_bucket'
 bucket = client.get_bucket(bucket_name)
 blobs = bucket.list_blobs()
 
@@ -63,7 +63,7 @@ def user_data_getter():
     file = None
 
     input_form = InputForm()
-    if input_form.validate_on_submit() or True:
+    if input_form.validate_on_submit():
         try:
             # Get the data from the form
             email = input_form.email.data
