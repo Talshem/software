@@ -38,8 +38,8 @@ DATA_PATHS = {
     "Prokaryote": E_COLI_DATA_PATH,
     "Homo sapiens": HUMAN_DATA_PATH,
     "Eukaryote": YEAST_DATA_PATH}
-"""
 
+"""
 def extract_top_homology_sequences(triggers_homology_mapping):
     homo_dfs = []
     for trigger_homology in triggers_homology_mapping:

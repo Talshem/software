@@ -33,7 +33,6 @@ bucket_name = 'protech_bucket'
 bucket = client.get_bucket(bucket_name)
 blobs = bucket.list_blobs()
 
-
 class InputForm(FlaskForm):
     email = StringField("Email", [DataRequired()], render_kw={"id": "email"})
     target_seq = StringField("RNA sequence", validators=[DataRequired()], render_kw={"id": "gene"})
