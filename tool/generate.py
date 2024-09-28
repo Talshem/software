@@ -1,4 +1,5 @@
 
+import pickle
 import numpy as np
 import pandas as pd
 from fuzzysearch import find_near_matches
@@ -49,16 +50,12 @@ def extract_top_homology_sequences(triggers_homology_mapping):
     rrf_rank = [RRF(trigger_homology_df, higher, lower, index='sequence') for trigger_homology_df in homo_dfs]
     return rrf_rank
 
-def rout_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigger_boo, transcripts_dict):
+def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigger_boo, transcripts_dict):
     results = pd.DataFrame()
     blob_name = DATA_PATHS[cell_type]
 
     blob = bucket.blob(blob_name)
-    cell_type_transcripts = blob.download_as_bytes()
-
-    #with open(data_path, 'rb') as f:
-    # cell_type_transcripts = pickle.load(f)
-
+    cell_type_transcripts = pickle.load(blob.download_as_bytes())
 
     if transcripts_dict != 'EMPTY':
         transcripts_dict = cell_type_transcripts | transcripts_dict
@@ -160,6 +157,7 @@ def prepare_and_send_report(df_results, rrf_ranks, email):
 
 if __name__ == '__main__':
     # Get the arguments from the user form.
+    
     s_mail = sys.argv[1]
     s_target_seq = sys.argv[2]
     s_trigger = sys.argv[3]
@@ -167,7 +165,6 @@ if __name__ == '__main__':
     s_cell_type = sys.argv[5]
     s_user_trigger_boo = sys.argv[6]
     s_transcripts_dict = sys.argv[7]
-    print('args sent to route input- pipeline exe function')
-    rout_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_dict)
-
-
+    print('sent to route_input')
+    route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_dict)
+    
