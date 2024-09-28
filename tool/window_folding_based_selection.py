@@ -12,8 +12,8 @@ from tqdm import tqdm
 
 MRNAS_FOLDER = ""
 CHROMOSOMES_FOLDER = ''
-RNAUP_BINARY_NAME = "/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAup"
-#RNAUP_BINARY_NAME = "/workspace/miniconda/bin/RNAup"
+#RNAUP_BINARY_NAME = "/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAup"
+RNAUP_BINARY_NAME = "/workspace/miniconda/bin/RNAup"
 WINDOW_SIZE = 23
 CONTEXT_WINDOW_SIZE = 50
 WINDOWS_COUNT = 1000
@@ -114,10 +114,10 @@ def get_potential_windows_scores(mRNA: str, window_size: int, context_window_siz
     return pd.DataFrame(windows_with_scores, columns=["window_sequence", "window_index", 'mfe_score'])
 
 
-def get_gene_top_ranked_windows(mRNA: str):
+def get_gene_top_ranked_windows(mRNA: str, window_size: int = 23) -> pd.DataFrame:
 
     windows_df = pd.DataFrame(columns=["window_sequence", "window_index", "transcript_id", "mfe_score"])
-    potential_windows_scores_df = get_potential_windows_scores(mRNA, WINDOW_SIZE, CONTEXT_WINDOW_SIZE)
+    potential_windows_scores_df = get_potential_windows_scores(mRNA, window_size, CONTEXT_WINDOW_SIZE)
     windows_df = pd.concat([
         windows_df, potential_windows_scores_df.sort_values(by="mfe_score", ascending=True)
         ])
