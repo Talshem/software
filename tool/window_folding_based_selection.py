@@ -12,7 +12,8 @@ from tqdm import tqdm
 
 MRNAS_FOLDER = ""
 CHROMOSOMES_FOLDER = ''
-RNAUP_BINARY_NAME = "/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAup"
+#RNAUP_BINARY_NAME = "/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAup"
+RNAUP_BINARY_NAME = "/workspace/miniconda/bin/RNAup"
 WINDOW_SIZE = 23
 CONTEXT_WINDOW_SIZE = 50
 WINDOWS_COUNT = 1000
