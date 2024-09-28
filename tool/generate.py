@@ -17,6 +17,7 @@ EDIT_DIST = 4
 TRIGGERS_BATCH = 2
 SWITCH_BATCH = 3
 
+
 E_COLI_DATA_PATH = "Escherichia_coli_ASM886v2.pkl"
 HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
 YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
@@ -76,15 +77,15 @@ def extract_top_homology_sequences(triggers_homology_mapping):
 def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigger_boo, transcripts_dict):
     results = pd.DataFrame()
     blob_name = DATA_PATHS[cell_type]
-    """
+
     blob = bucket.blob(blob_name)
     cell_type_transcripts = pickle.load(blob.download_as_bytes())
-    """
 
     # for development
+    """"
     with open(blob_name, 'rb') as f:
         cell_type_transcripts = pickle.load(f)
-
+    """
     if transcripts_dict != 'EMPTY':
         transcripts_dict = cell_type_transcripts | transcripts_dict
     else:
@@ -110,7 +111,6 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
         pd.DataFrame(switch_res, columns=['switch', "ensemble_defect", "complex_concentration"]))
     prepare_and_send_report(results, rrf_ranks, email)
     return
-
 
 def RRF(ranking_df, higher_is_better_cols, lower_is_better_cols, index, k=60):
     isinstance(higher_is_better_cols, list)
@@ -183,7 +183,7 @@ def prepare_and_send_report(df_results, rrf_ranks, email):
 
 if __name__ == '__main__':
     # Get the arguments from the user form.
-    
+
     s_mail = sys.argv[1]
     s_target_seq = sys.argv[2]
     s_trigger = sys.argv[3]
@@ -192,7 +192,12 @@ if __name__ == '__main__':
     s_user_trigger_boo = sys.argv[6]
     s_transcripts_dict = sys.argv[7]
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_dict)
+    """
+    testing = {'gene': 'OR4F5',
+     'protein': 'olfactory receptor 4F5',
+     'sequence': 'ATGAAGAAGGTAACTGCAGAGGCTATTTCCTGGAATGAATCAACGAGTGAAACGAATAACTCTATGGTGACTGAATTCATTTTTCTGGGTCTCTCTGATTCTCAGGAACTCCAGACCTTCCTATTTATGTTGTTTTTTGTATTCTATGGAGGAATCGTGTTTGGAAACCTTCTTATTGTCATAACAGTGGTATCTGACTCCCACCTTCACTCTCCCATGTACTTCCTGCTAGCCAACCTCTCACTCATTGATCTGTCTCTGTCTTCAGTCACAGCCCCCAAGATGATTACTGACTTTTTCAGCCAGCGCAAAGTCATCTCTTTCAAGGGCTGCCTTGTTCAGATATTTCTCCTTCACTTCTTTGGTGGGAGTGAGATGGTGATCCTCATAGCCATGGGCTTTGACAGATATATAGCAATATGCAAGCCCCTACACTACACTACAATTATGTGTGGCAACGCATGTGTCGGCATTATGGCTGTCACATGGGGAATTGGCTTTCTCCATTCGGTGAGCCAGTTGGCGTTTGCCGTGCACTTACTCTTCTGTGGTCCCAATGAGGTCGATAGTTTTTATTGTGACCTTCCTAGGGTAATCAAACTTGCCTGTACAGATACCTACAGGCTAGATATTATGGTCATTGCTAACAGTGGTGTGCTCACTGTGTGTTCTTTTGTTCTTCTAATCATCTCATACACTATCATCCTAATGACCATCCAGCATCGCCCTTTAGATAAGTCGTCCAAAGCTCTGTCCACTTTGACTGCTCACATTACAGTAGTTCTTTTGTTCTTTGGACCATGTGTCTTTATTTATGCCTGGCCATTCCCCATCAAGTCATTAGATAAATTCCTTGCTGTATTTTATTCTGTGATCACCCCTCTCTTGAACCCAATTATATACACACTGAGGAACAAAGACATGAAGACGGCAATAAGACAGCTGAGAAAATGGGATGCACATTCTAGTGTAAAGTTTTAG'}
 
+    """
 
 
 

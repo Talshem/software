@@ -17,3 +17,5 @@ Bio
 google-cloud-storage
 google
 joblib
+xlsxwriter
+
