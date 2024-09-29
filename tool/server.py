@@ -1,8 +1,6 @@
 import os
 import subprocess
-import random
 import json
-from Bio.Seq import Seq
 from wtforms import validators
 from flask_wtf import FlaskForm, CSRFProtect
 from werkzeug.utils import secure_filename
@@ -11,15 +9,12 @@ from wtforms.validators import DataRequired, Length
 from flask import Flask, render_template, request, redirect, url_for, flash, abort, current_app, jsonify
 from flask_wtf.file import FileField
 from wtforms import StringField, TextAreaField, SubmitField
-import re
-from tool.window_folding_based_selection import get_potential_windows_scores
-from tool.switch_generator import SwitchGenerator
 from google.cloud import storage
 from tool.server_utils import process_file_stream
-import os
+
 
 # Initialize the Flask app
-app = Flask(__name__, template_folder='tool/templates')
+app = Flask(__name__, template_folder='templates')
 csrf = CSRFProtect(app)
 csrf.init_app(app)
 app.config['SECRET_KEY'] = os.urandom(24)
