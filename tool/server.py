@@ -19,7 +19,7 @@ from tool.server_utils import process_file_stream
 import os
 
 # Initialize the Flask app
-app = Flask(__name__, template_folder='tool/templates')
+app = Flask(__name__)
 csrf = CSRFProtect(app)
 csrf.init_app(app)
 app.config['SECRET_KEY'] = os.urandom(24)
