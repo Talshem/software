@@ -1,7 +1,7 @@
 import io
 import sys
 import pickle
-import app.numpy as np
+import numpy as np
 import pandas as pd
 from fuzzysearch import find_near_matches
 from google.cloud import storage
