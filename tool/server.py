@@ -119,4 +119,4 @@ def internal_error(e):
 
 
 if __name__ == '__main__':
-    app.run(port=3000)
+    app.run(debug=True)
