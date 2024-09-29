@@ -1,7 +1,7 @@
 import io
 import sys
 import pickle
-import numpy as np
+import app.numpy as np
 import pandas as pd
 from fuzzysearch import find_near_matches
 from google.cloud import storage
@@ -17,7 +17,6 @@ from tool.window_folding_based_selection import WINDOW_SIZE
 from RNA import RNA
 from nupack import *
 config.threads = 8
-
 
 EDIT_DIST = 4
 TRIGGERS_BATCH = 2
