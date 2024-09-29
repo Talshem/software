@@ -1,3 +1,4 @@
+import io
 import sys
 import pickle
 import numpy as np
@@ -11,6 +12,7 @@ from tool.prokaryotic_switch_generator import ProkaryoticSwitchGenerator
 from tool.window_folding_based_selection import get_gene_top_ranked_windows, get_mRNA_opening_mfe
 from utils.send_mail import send_email_with_attachment as send
 from utils.seqeunce_consts import GFP_GENE
+from tool.server import bucket
 from tool.window_folding_based_selection import WINDOW_SIZE
 from RNA import RNA
 from nupack import *
@@ -46,10 +48,6 @@ DATA_PATHS = {
 
 """
 
-client = storage.Client()
-bucket_name = 'protech_bucket'
-bucket = client.get_bucket(bucket_name)
-blobs = bucket.list_blobs()
 
 def extract_top_homology_sequences(triggers_homology_mapping):
     homo_dfs = []
@@ -67,15 +65,16 @@ def extract_top_homology_sequences(triggers_homology_mapping):
                 mfe_dict['homologous_trigger_mfe'].append(mfe)
             mfe_df = pd.DataFrame(mfe_dict)
 
+
             trig_res_df = pd.concat([matches_df, mfe_df], axis=1)
 
         else:
             trig_res_df = pd.DataFrame(
+
                 columns=['distance', 'idx',
                          'sequence',
                          'gene', 'protein',
                          'homologous_trigger_mfe'])
-
         homo_dfs.append(trig_res_df)
 
     # TODO: add expression levels
@@ -92,16 +91,17 @@ def extract_top_homology_sequences(triggers_homology_mapping):
 def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigger_boo, transcripts_dict):
     results = pd.DataFrame()
     blob_name = DATA_PATHS[cell_type]
-
     blob = bucket.blob(blob_name)
-    cell_type_transcripts = pickle.load(blob.download_as_bytes())
+    bytes_data = blob.download_as_bytes()
+    file_like_obj = io.BytesIO(bytes_data)
+    cell_type_transcripts = pickle.load(file_like_obj)
 
     # for development
     """""
     # Load transcripts for the specific cell type
     with open(blob_name, 'rb') as f:
         cell_type_transcripts = pickle.load(f)
-    """""
+    """
     # Update transcripts dict
     if transcripts_dict != 'EMPTY':
         transcripts_dict = cell_type_transcripts | transcripts_dict
@@ -136,8 +136,11 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     )
     e_switch = time.time()
     print(f'Switch generation time= {e_switch - s_switch} seconds, for {SWITCH_BATCH} switches')
+
     results[['switch',  "complex_concentration"]] = pd.DataFrame(
         switch_res, columns=['switch', "complex_concentration"])
+
+
 
     # Prepare and send the report
     prepare_and_send_report(results, rrf_ranks, email)
@@ -237,13 +240,10 @@ if __name__ == '__main__':
     s_user_trigger_boo = sys.argv[6]
     s_transcripts_dict = sys.argv[7]
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_dict)
+
     """
     testing = {'gene': 'OR4F5',
      'protein': 'olfactory receptor 4F5',
      'sequence': 'ATGAAGAAGGTAACTGCAGAGGCTATTTCCTGGAATGAATCAACGAGTGAAACGAATAACTCTATGGTGACTGAATTCATTTTTCTGGGTCTCTCTGATTCTCAGGAACTCCAGACCTTCCTATTTATGTTGTTTTTTGTATTCTATGGAGGAATCGTGTTTGGAAACCTTCTTATTGTCATAACAGTGGTATCTGACTCCCACCTTCACTCTCCCATGTACTTCCTGCTAGCCAACCTCTCACTCATTGATCTGTCTCTGTCTTCAGTCACAGCCCCCAAGATGATTACTGACTTTTTCAGCCAGCGCAAAGTCATCTCTTTCAAGGGCTGCCTTGTTCAGATATTTCTCCTTCACTTCTTTGGTGGGAGTGAGATGGTGATCCTCATAGCCATGGGCTTTGACAGATATATAGCAATATGCAAGCCCCTACACTACACTACAATTATGTGTGGCAACGCATGTGTCGGCATTATGGCTGTCACATGGGGAATTGGCTTTCTCCATTCGGTGAGCCAGTTGGCGTTTGCCGTGCACTTACTCTTCTGTGGTCCCAATGAGGTCGATAGTTTTTATTGTGACCTTCCTAGGGTAATCAAACTTGCCTGTACAGATACCTACAGGCTAGATATTATGGTCATTGCTAACAGTGGTGTGCTCACTGTGTGTTCTTTTGTTCTTCTAATCATCTCATACACTATCATCCTAATGACCATCCAGCATCGCCCTTTAGATAAGTCGTCCAAAGCTCTGTCCACTTTGACTGCTCACATTACAGTAGTTCTTTTGTTCTTTGGACCATGTGTCTTTATTTATGCCTGGCCATTCCCCATCAAGTCATTAGATAAATTCCTTGCTGTATTTTATTCTGTGATCACCCCTCTCTTGAACCCAATTATATACACACTGAGGAACAAAGACATGAAGACGGCAATAAGACAGCTGAGAAAATGGGATGCACATTCTAGTGTAAAGTTTTAG'}
     route_input('erlichnet57@gmail.com','ATGAAGAAGGTAACTGCAGAGGCTATTTCCTGGAATGAATCAACGAGTGAAACGAATAACTCTATGGTGACTGAATTCATTTTTCTGGGTCTCTCTGATTCTCAGGAACTC','EMPTY','TCAGGAACTCCAGACCTTCCTATTTATGTTGTTTTTTGTATTCTATGGAGGAATCGT','Homo sapiens', 'EMPTY', 'EMPTY')
     """
-
-
-
-

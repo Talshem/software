@@ -26,6 +26,9 @@ app.config['SECRET_KEY'] = os.urandom(24)
 app.config['MAX_CONTENT_LENGTH'] = 210 * 1024 * 1024  # 210 MB
 app.config['UPLOAD_EXTENSIONS'] = ['.fasta']
 
+client = storage.Client()
+bucket_name = 'protech_bucket'
+bucket = client.get_bucket(bucket_name)
 
 class InputForm(FlaskForm):
     email = StringField("Email", [DataRequired()], render_kw={"id": "email"})
