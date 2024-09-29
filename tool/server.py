@@ -19,7 +19,7 @@ from tool.server_utils import process_file_stream
 import os
 
 # Initialize the Flask app
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder='tool/templates')
 csrf = CSRFProtect(app)
 csrf.init_app(app)
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -59,10 +59,7 @@ def user_data_getter():
     file = None
 
     input_form = InputForm()
-
-
-    if input_form.validate_on_submit() or True:
-
+    if input_form.validate_on_submit():
         try:
             # Get the data from the form
             email = input_form.email.data
