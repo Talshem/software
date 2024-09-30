@@ -8,4 +8,4 @@ EXPOSE 8080
 
 WORKDIR /workspace
 
-CMD ["/workspace/miniconda3/bin/gunicorn", "-b", "0.0.0.0:8080", "tool.server:app"]
+CMD ["/workspace/miniconda3/envs/myenv/bin/gunicorn", "-b", "0.0.0.0:8080", "tool.server:app"]
