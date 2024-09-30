@@ -35,9 +35,7 @@ steps:
         /workspace/miniconda3/bin/conda config --add channels conda-forge
         /workspace/miniconda3/bin/conda config --set channel_priority strict
         /workspace/miniconda3/bin/conda install bioconda numpy scipy pip matplotlib pandas jupyterlab        
-        /workspace/miniconda3/bin/conda install viennarna
-        /workspace/miniconda3/envs/myenv/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/package
-        /workspace/miniconda3/envs/myenv/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA joblib Bio fuzzysearch
+        /workspace/miniconda3/bin/conda install viennarna        
  
 
   # Build the container image
