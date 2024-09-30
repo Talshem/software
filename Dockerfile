@@ -12,6 +12,6 @@ RUN /workspace/miniconda3/envs/myenv/bin/pip install -U nupack -f /workspace/nup
 RUN /workspace/miniconda3/envs/myenv/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA joblib Bio fuzzysearch
 
 # Make RUN commands use the new environment:
-SHELL ["conda", "run", "-n", "myenv", "/bin/bash", "-c"]
+#SHELL ["conda", "run", "-n", "myenv", "/bin/bash", "-c"]
 
-CMD ["/workspace/miniconda3/envs/myenv/bin/gunicorn", "-b", "0.0.0.0:8080", "tool.server:app"]
+CMD ["/workspace/miniconda3/envs/myenv/bin/gunicorn", "-b", "0.0.0.0:8080", "--pythonpath", "/workspace/miniconda3/envs/myenv/bin", "tool.server:app"]
