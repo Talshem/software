@@ -12,10 +12,10 @@ from flask import Flask, render_template, request, redirect, url_for, flash, abo
 from flask_wtf.file import FileField
 from wtforms import StringField, TextAreaField, SubmitField
 import re
-from tool.window_folding_based_selection import get_potential_windows_scores
-from tool.switch_generator import SwitchGenerator
+from .window_folding_based_selection import get_potential_windows_scores
+from .switch_generator import SwitchGenerator
 from google.cloud import storage
-from tool.server_utils import process_file_stream
+from .server_utils import process_file_stream
 import os
 
 # Initialize the Flask app
