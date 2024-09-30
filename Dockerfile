@@ -14,4 +14,4 @@ RUN /workspace/miniconda3/envs/myenv/bin/pip install gunicorn biopython flask wt
 # Make RUN commands use the new environment:
 #SHELL ["conda", "run", "-n", "myenv", "/bin/bash", "-c"]
 
-CMD ["/workspace/miniconda3/envs/myenv/bin/gunicorn", "-b", "0.0.0.0:8080", "--pythonpath", "/workspace/miniconda3/envs/myenv/bin", "tool.server:app"]
+CMD ["/workspace/miniconda3/envs/myenv/bin/gunicorn", "-b", "0.0.0.0:8080", "tool.server:app"]
