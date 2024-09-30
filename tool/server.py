@@ -32,7 +32,7 @@ bucket = client.get_bucket(bucket_name)
 
 class InputForm(FlaskForm):
     email = StringField("Email", [DataRequired()], render_kw={"id": "email"})
-    target_seq = StringField("RNA sequence", validators=[DataRequired()], render_kw={"id": "gene"})
+    target_seq = StringField("RNA sequence", render_kw={"id": "gene"})
     user_trigger_bool = BooleanField("Got a known trigger?", render_kw={"id": "user_trigger_bool"})
     trigger = StringField("Input Trigger (23 nucleotides)", render_kw={"id": "trigger"}, validators=[validators.Length(min=23, max=23, message="Trigger must be 23 nucleotides long")])
     reporter_gene = StringField("Reporter Gene", render_kw={"id": "reporter_gene"}, validators=[DataRequired()])
