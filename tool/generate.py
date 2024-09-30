@@ -7,13 +7,13 @@ from fuzzysearch import find_near_matches
 from google.cloud import storage
 from joblib import Parallel, delayed
 import time
-from tool.switch_generator import SwitchGenerator
-from tool.prokaryotic_switch_generator import ProkaryoticSwitchGenerator
-from tool.window_folding_based_selection import get_gene_top_ranked_windows, get_mRNA_opening_mfe
+from .switch_generator import SwitchGenerator
+from .prokaryotic_switch_generator import ProkaryoticSwitchGenerator
+from .window_folding_based_selection import get_gene_top_ranked_windows, get_mRNA_opening_mfe
 from utils.send_mail import send_email_with_attachment as send
 from utils.seqeunce_consts import GFP_GENE
-from tool.server import bucket
-from tool.window_folding_based_selection import WINDOW_SIZE
+from .server import bucket
+from .window_folding_based_selection import WINDOW_SIZE
 from RNA import RNA
 from nupack import *
 config.threads = 8
