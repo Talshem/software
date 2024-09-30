@@ -8,4 +8,7 @@ EXPOSE 8080
 
 WORKDIR /workspace
 
+RUN /workspace/miniconda3/envs/myenv/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/package
+RUN /workspace/miniconda3/envs/myenv/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA joblib Bio fuzzysearch
+
 CMD ["/workspace/miniconda3/envs/myenv/bin/gunicorn", "-b", "0.0.0.0:8080", "tool.server:app"]
