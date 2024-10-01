@@ -1,6 +1,6 @@
-from .server_utils import process_file_stream
-from .utils.seqeunce_consts import M_CHERRY_ORF, GFP_GENE
-from .server_utils import validate_sequence_bool
+from server_utils import process_file_stream
+from utils.seqeunce_consts import M_CHERRY_ORF, GFP_GENE
+from server_utils import validate_sequence_bool
 
 import os
 import subprocess
