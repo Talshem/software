@@ -1,4 +1,4 @@
-steps:
+  steps:
   # Clone the repository and configure credentials
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
