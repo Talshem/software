@@ -4,7 +4,7 @@ from datetime import datetime
 from multiprocessing import Pool
 
 from Bio import Align
-from .utils.suffix_tree import Suffixtree
+from utils.suffix_tree import Suffixtree
 
 
 def find_similar_sequences_bio(trigger: str, sequences_dict: dict[str:str]) -> Align.Alignment:
