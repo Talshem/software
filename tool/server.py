@@ -2,7 +2,6 @@ from .server_utils import process_file_stream
 from .utils.seqeunce_consts import M_CHERRY_ORF, GFP_GENE
 from .server_utils import validate_sequence_bool
 
-
 import os
 import subprocess
 import json
@@ -12,7 +11,7 @@ from flask import Flask, render_template, flash, request
 from flask_wtf.file import FileField
 from wtforms import StringField, SubmitField, BooleanField, SelectField, ValidationError, validators
 from werkzeug.utils import secure_filename
-#from google.cloud import storage
+from google.cloud import storage
 from flask import session
 
 # Initialize the Flask app
@@ -23,11 +22,11 @@ csrf.init_app(app)
 app.config['SECRET_KEY'] = 'shaniqua'
 app.config['MAX_CONTENT_LENGTH'] = 210 * 1024 * 1024  # 210 MB
 app.config['UPLOAD_EXTENSIONS'] = ['.fasta']
-"""
+
 client = storage.Client()
 bucket_name = 'protech_bucket'
 bucket = client.get_bucket(bucket_name)
-"""
+
 def validate_trigger_length(form, field):
     organism_type = form.cell_type.data
     if not form.user_trigger_bool.data:
@@ -84,7 +83,6 @@ def validate_file_format(form, filed):
             raise ValidationError("Invalid format.")
     else:
         return True
-
 
 class InputForm(FlaskForm):
     email = StringField("Email", [DataRequired()], render_kw={"id": "email"})

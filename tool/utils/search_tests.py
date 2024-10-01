@@ -3,7 +3,7 @@ import random
 import time
 import pickle
 
-#from .generate import find_homology
+from .generate import find_homology
 from itertools import combinations
 from .generate import find_near_matches, build_homology_map
 
