@@ -17,9 +17,9 @@ import generateFeatures
 config.threads = 4
 
 #RNAUP_BINARY_NAME = "/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAup"
-RNAUP_BINARY_NAME = "/workspace/miniconda/bin/RNAup"
+RNAUP_BINARY_NAME = "/workspace/miniconda3/envs/myenv/bin/RNAup"
 #RNACOFOLD_BINARY_NAME = '/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAcofold'
-RNACOFOLD_BINARY_NAME = '/workspace/miniconda/bin/RNAcofold'
+RNACOFOLD_BINARY_NAME = '/workspace/miniconda3/envs/myenv/bin/RNAcofold'
 
 class dotdict(dict):
     """dot.notation access to dictionary attributes"""
