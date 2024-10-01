@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <title>Form Submission</title>
+    <title>ToREC</title>
     <style type = "text/css">
         h1 {
             margin-bottom: 20px;
-            font-size: 3em;
+            font-size: 15em;
             font-family: Trebuchet MS, sans-serif;
             justify-content: center;
             align-items: center;
             text-align: center;
+            font-weight: bold;
         }
         .file-drop-area {
             position: relative;
@@ -60,6 +61,8 @@
         }
         .form-group {
             position: relative;
+            margin-bottom: 20px;
+
         }
         .question-mark {
             margin-left: 10px;
@@ -89,6 +92,7 @@
         }
         .form-group.disabled {
             display: none;
+
         }
         .trigger-hidden {
             display: none; /* Hides the trigger field initially */
@@ -98,10 +102,9 @@
 <body>
     {% include 'navbar.html' %} <!-- Include the navbar.html template -->
     <div class="container">
-       <h1>Form Submission</h1>
+       <h1>ToREC</h1>
         <form action="{{ url_for('user_data_getter') }}" method="POST" enctype="multipart/form-data" novalidate>
             {{ input_form.hidden_tag() }}
-
             <!-- Email Field -->
             <div class="form-group">
                 {{ input_form.email.label }}

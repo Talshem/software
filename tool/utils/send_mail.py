@@ -16,7 +16,7 @@ EMAIL_PASSWORD = "eefg btov iwsp xzgt"
 
 
 def send_email_with_attachment(results_df, to_email):
-    subject = 'REACT WebTool Analysis Report'
+    subject = 'ToREC WebTool Analysis Report'
     body = """
     Dear User,
 

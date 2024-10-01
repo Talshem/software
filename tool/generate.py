@@ -3,7 +3,7 @@ from switch_generator import SwitchGenerator
 from prokaryotic_switch_generator import ProkaryoticSwitchGenerator
 from window_folding_based_selection import get_gene_top_ranked_windows
 from utils.send_mail import send_email_with_attachment as send
-#from server import bucket
+from server import bucket
 
 import json
 import pickle
@@ -27,13 +27,15 @@ SWITCH_BATCH = 2
 E_COLI_DATA_PATH = "Escherichia_coli_ASM886v2.pkl"
 HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
 YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
-"""
+
 DATA_PATHS = {
     "E.coli": E_COLI_DATA_PATH,
     "Homo sapiens": HUMAN_DATA_PATH,
     "Saccharomyces cerevisiae": YEAST_DATA_PATH
 }
-"""
+
+
+
 """
 # for development
 E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
@@ -46,7 +48,6 @@ DATA_PATHS = {
     "Saccharomyces cerevisiae": YEAST_DATA_PATH
     }
 """
-
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
@@ -111,15 +112,12 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
         raise ValueError("Invalid target sequence provided")
 
     results = pd.DataFrame()
-    #blob_name = DATA_PATHS.get(cell_type)
-    #blob = bucket.blob(blob_name)
-    #bytes_data = blob.download_as_bytes()
-    #file_like_obj = io.BytesIO(bytes_data)
-    #cell_type_transcripts = pickle.load(file_like_obj)
+    blob_name = DATA_PATHS.get(cell_type)
+    blob = bucket.blob(blob_name)
+    bytes_data = blob.download_as_bytes()
+    file_like_obj = io.BytesIO(bytes_data)
+    cell_type_transcripts = pickle.load(file_like_obj)
 
-    #Test
-    cell_type_transcripts = [{'gene':'test', 'protein':'prot',
-                              'sequence':"AGATAGATAGATAGATAGTAAGAATGAATGAATAGAATAGAATGATAAGATAGATAGATAGATAGTAAGAATGAATGAATAGAATAGAATGATAAGATAGATAGATAGATAGTAAGAATGAATGAATAGAATAGAATGATA"}]
     # Update transcripts_list
     if transcripts_list != 'EMPTY':
         transcripts_list = json.loads(transcripts_list)
@@ -215,12 +213,6 @@ def build_homology_map(trigger, seq, gene_name, protein_name):
     if not isinstance(seq, str) or not seq:
         logging.error("Invalid sequence provided.")
         return []
-    if not isinstance(gene_name, str):
-        logging.error("Gene name must be a string.")
-        gene_name = "Unknown"
-    if not isinstance(protein_name, str):
-        logging.error("Protein name must be a string.")
-        protein_name = "Unknown"
 
     sequence_match_mapping = []
 
@@ -358,8 +350,6 @@ def prepare_and_send_report(df_results, rrf_ranks, email):
 
 if __name__ == '__main__':
     # Get the arguments from the user form.
-
-    """
     s_mail = sys.argv[1]
     s_target_seq = sys.argv[2]
     s_trigger = sys.argv[3]
@@ -368,11 +358,4 @@ if __name__ == '__main__':
     s_user_trigger_boo = sys.argv[6]
     s_transcripts_list = sys.argv[7]
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
-    """
-
-    route_input('erlichnet57@gmail.com', 'ATGCGTACGATGCGTACGATGCGTACGATGCGTACGATGCGTACGATGCGTACGATGCGTACGATGCGTACGGCGTACGATGCGTACGATGCGTACGGCGTACGATGCGTACGATGCGTACG',
-                'EMPTY', 'ATGCGTACGATGCGTACGATGCGTACGATGCGTACGAGATGAATGATA',
-                'E.coli', 'True', 'EMPTY')
-
-
 
