@@ -9,7 +9,8 @@ EXPOSE 8080
 WORKDIR /workspace
 
 RUN /workspace/miniconda3/envs/myenv/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/package
-RUN /workspace/miniconda3/envs/myenv/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA joblib Bio fuzzysearch
+RUN /workspace/miniconda3/envs/myenv/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA joblib Bio fuzzysearch XlsxWriter Werkzeug
+
 
 # Make RUN commands use the new environment:
 #SHELL ["conda", "run", "-n", "myenv", "/bin/bash", "-c"]
