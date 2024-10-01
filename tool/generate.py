@@ -183,8 +183,10 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     return
 
 def get_score_calc(cell_type):
+
     with open(feature_path, 'r') as file:
         feature_f = file.read()
+
     feature_list = eval(feature_f)
 
     if cell_type == 'E.coli':
