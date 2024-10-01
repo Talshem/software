@@ -35,9 +35,8 @@ steps:
         /workspace/miniconda3/bin/conda config --add channels conda-forge
         /workspace/miniconda3/bin/conda config --set channel_priority strict
         /workspace/miniconda3/bin/conda install bioconda numpy scipy pip matplotlib pandas jupyterlab        
-        /workspace/miniconda3/bin/conda install viennarna
-        /workspace/miniconda3/bin/pip install -U nupack -f /workspace/nupack-4.0.1.12/package
-        /workspace/miniconda3/bin/pip install gunicorn biopython flask wtforms flask_wtf werkzeug google-cloud-storage tqdm numpy scipy pip matplotlib pandas jupyterlab viennaRNA joblib Bio fuzzysearch
+        /workspace/miniconda3/bin/conda install viennarna        
+ 
 
   # Build the container image
   - name: gcr.io/cloud-builders/docker
@@ -53,9 +52,9 @@ steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args: ['run', 'deploy', 'software', '--image', 'gcr.io/protech-new-435412/software', '--region', 'us-central1']
-    
+
 images:
   - gcr.io/protech-new-435412/software
-  
+
 options:
-  logging: CLOUD_LOGGING_ONLY  
+  logging: CLOUD_LOGGING_ONLY

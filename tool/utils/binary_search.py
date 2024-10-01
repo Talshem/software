@@ -1,6 +1,3 @@
-import numpy as np
-import pickle
-import pandas as pd
 
 def is_within_mismatches(suffix, target, max_mismatches):
     if len(suffix) != len(target):

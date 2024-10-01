@@ -48,7 +48,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-
             border: 1px solid #ddd;
             border-radius: 4px;
             margin-bottom: 5px;
@@ -63,22 +62,22 @@
             position: relative;
         }
         .question-mark {
-                margin-left: 10px; /* Adjust as needed to control space between text and question mark */
-                cursor: pointer;
-                color: #007bff;
-                font-weight: bold;
-                vertical-align: middle; /* Ensures it's aligned with the input field */
-
-
+            margin-left: 10px;
+            cursor: pointer;
+            color: #007bff;
+            font-weight: bold;
+            vertical-align: middle;
         }
         .tooltiptext2 {
-            display: none; /* Initially hidden */
-            background-color: #555;
-            color: #fff;
-            text-align: right;
+
+            display: none;
+            background-color: #D3D3D3;
+            color: #000;
+            text-align: left;
             border-radius: 0px;
-            top: 100%; /* Position below the input box */
+            top: 100%;
             left: 0%;
+            right: 20%;
             white-space: nowrap;
             z-index: 1;
         }
@@ -88,9 +87,11 @@
         .question-mark-known-trigger:hover + .tooltiptext2 {
             display: none;
         }
-        /* Hide label and description when field is disabled */
         .form-group.disabled {
             display: none;
+        }
+        .trigger-hidden {
+            display: none; /* Hides the trigger field initially */
         }
     </style>
 </head>
@@ -104,7 +105,7 @@
             <!-- Email Field -->
             <div class="form-group">
                 {{ input_form.email.label }}
-                {{ input_form.email(class="form-control" + (" is-invalid" if input_form.email.errors else ""), placeholder="Enter your email") }}
+                {{ input_form.email(class="form-control" + (" is-invalid" if input_form.email.errors else ""), placeholder="") }}
                 {% if input_form.email.errors %}
                     <div class="invalid-feedback d-block">
                         {{ input_form.email.errors[0] }}
@@ -116,11 +117,24 @@
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.target_seq.label }}
                 <span class="question-mark">?</span>
-                <span class="tooltiptext2">Additional information about the gene input</span>
-                {{ input_form.target_seq(class="form-control" + (" is-invalid" if input_form.target_seq.errors else ""), placeholder="Enter RNA sequence") }}
+                <span class="tooltiptext2">Enter the target gene RNA sequence to find the best trigger sequence for the toehold switch.</span>
+                {{ input_form.target_seq(class="form-control" + (" is-invalid" if input_form.target_seq.errors else ""), placeholder="") }}
                 {% if input_form.target_seq.errors %}
                     <div class="invalid-feedback d-block">
                         {{ input_form.target_seq.errors[0] }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Cell Type Field -->
+            <div class="form-group" data-toggle="tooltip">
+                {{ input_form.cell_type.label }}
+                <span class="question-mark">?</span>
+                <span class="tooltiptext2">Select the organism type for optimized modeling.</span>
+                {{ input_form.cell_type(class="form-control" + (" is-invalid" if input_form.cell_type.errors else "")) }}
+                {% if input_form.cell_type.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ input_form.cell_type.errors[0] }}
                     </div>
                 {% endif %}
             </div>
@@ -129,17 +143,16 @@
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.user_trigger_bool.label }}
                 <span class="question-mark">?</span>
-                <span class="tooltiptext2">file exp</span>
+                <span class="tooltiptext2">Check if you already know the trigger sequence to skip the RNA sequence input.</span>
                 {{ input_form.user_trigger_bool(class="form-control-inline" + (" is-invalid" if input_form.user_trigger_bool.errors else "")) }}
-
             </div>
 
             <!-- Trigger Input Field -->
-            <div class="form-group" data-toggle="tooltip">
+            <div class="form-group" id="trigger-group" data-toggle="tooltip">
                 {{ input_form.trigger.label }}
                 <span class="question-mark">?</span>
-                <span class="tooltiptext2">Additional information about the trigger input</span>
-                {{ input_form.trigger(class="form-control" + (" is-invalid" if input_form.trigger.errors else ""), placeholder="Enter trigger sequence (23 nucleotides)") }}
+                <span class="tooltiptext2"> Trigger sequence should be 23 nucleotides for Eukaryote and Homo sapiens, and 30 nucleotides for Prokaryote</span>
+                {{ input_form.trigger(class="form-control" + (" is-invalid" if input_form.trigger.errors else ""), placeholder="") }}
                 {% if input_form.trigger.errors %}
                     <div class="invalid-feedback d-block">
                         {{ input_form.trigger.errors[0] }}
@@ -151,9 +164,8 @@
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.reporter_gene.label }}
                 <span class="question-mark">?</span>
-                <span class="tooltiptext2">Additional information about the reporter gene input</span>
-                {{ input_form.reporter_gene(class="form-control" + (" is-invalid" if input_form.reporter_gene.errors else ""), placeholder="Enter reporter gene") }}
-
+                <span class="tooltiptext2">Specify the reporter gene for measurable gene expression output or pick option.</span>
+                {{ input_form.reporter_gene(class="form-control" + (" is-invalid" if input_form.reporter_gene.errors else ""), placeholder="") }}
                 {% if input_form.reporter_gene.errors %}
                     <div class="invalid-feedback d-block">
                         {{ input_form.reporter_gene.errors[0] }}
@@ -161,28 +173,26 @@
                 {% endif %}
             </div>
 
-            <!-- Cell Type Field -->
+
             <div class="form-group" data-toggle="tooltip">
-                {{ input_form.cell_type.label }}
-                <span class="question-mark">?</span>
-                <span class="tooltiptext2">Select the organism type</span>
-
-                {{ input_form.cell_type(class="form-control" + (" is-invalid" if input_form.cell_type.errors else "")) }}
-
-                {% if input_form.cell_type.errors %}
+                {{ input_form.optional_reporter.label }}
+                {{ input_form.optional_reporter(class="form-control" + (" is-invalid" if input_form.optional_reporter.errors else "")) }}
+                {% if input_form.optional_reporter.errors %}
                     <div class="invalid-feedback d-block">
-                        {{ input_form.cell_type.errors[0] }}
+                        {{ input_form.optional_reporter.errors[0] }}
                     </div>
                 {% endif %}
             </div>
 
             <!-- File Upload Field -->
-            <div class="form-group" data-toggle="tooltip" title="File format '.fasta', Organism genome will be used in the absence of a file.">
+            <div class="form-group" data-toggle="tooltip">
                 {{ input_form.file.label }}
                 <span class="question-mark">?</span>
-                <span class="tooltiptext2">file exp</span>
+
+                <span class="tooltiptext2">Supported formats: ".fasta", ".fa", ".fastq", ".gb", ".gbk", ".embl", ".phy", ".phylip", ".aln", ".nex", ".stockholm", ".tab", ".qual", ".abi", ".sff", ".xml" </span>
                 <div class="file-drop-area">
-                    <span class="file-drop-message">Drop files here or click to upload</span>
+                    <span class="file-drop-message">Upload a transcriptome file for precise toehold design, or skip to use the default organism genome only.</span>
+                    <input type="file" name="file" class="form-control-file">
                     {{ input_form.file(class="form-control-file" + (" is-invalid" if input_form.file.errors else "")) }}
                 </div>
                 <div class="file-list"></div>
@@ -196,38 +206,59 @@
             <!-- Submit Button -->
             {{ input_form.submit(class="btn btn-primary") }}
         </form>
-
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     <script>
         // Initialize tooltips
         $(document).ready(function(){
             $('[data-toggle="tooltip"]').tooltip();
         });
 
-        // JavaScript to handle enabling/disabling fields based on checkbox
+        // JavaScript to dynamically enable/disable the target and trigger input fields
         document.addEventListener("DOMContentLoaded", function() {
+            var organismSelect = document.getElementById("cell_type");
+            var triggerInput = document.getElementById("trigger");
+            var targetInput = document.getElementById("gene");
             var userTriggerCheckbox = document.getElementById("user_trigger_bool");
-            var geneFieldGroup = document.querySelector(".form-group:nth-child(3)");
-            var triggerFieldGroup = document.querySelector(".form-group:nth-child(5)");
 
+            // Toggle the enabled/disabled state of target and trigger fields
             function toggleFields() {
                 if (userTriggerCheckbox.checked) {
-                    geneFieldGroup.classList.add('disabled');
-                    triggerFieldGroup.classList.remove('disabled');
+                    targetInput.disabled = true; // Disable target sequence input
+                    triggerInput.disabled = false; // Enable trigger input
                 } else {
-                    geneFieldGroup.classList.remove('disabled');
-                    triggerFieldGroup.classList.add('disabled');
+                    targetInput.disabled = false; // Enable target sequence input
+                    triggerInput.disabled = true; // Disable trigger input
                 }
             }
 
+            // Call the function when the checkbox changes
             userTriggerCheckbox.addEventListener("change", toggleFields);
 
-            // Initial call to set the state correctly on page load
+            // Call the function on page load to set the initial state
             toggleFields();
+
+            // Dynamically change the placeholder for trigger input based on organism type
+            organismSelect.addEventListener("change", function() {
+                var selectedOrganism = organismSelect.value;
+
+                if (selectedOrganism === "E.coli") {
+                    triggerInput.placeholder = "Enter trigger sequence (23 nucleotides)";
+                    triggerInput.setAttribute("maxlength", "23");
+                    triggerInput.setAttribute("minlength", "23");
+                } else {
+                    triggerInput.placeholder = "Enter trigger sequence (30 nucleotides)";
+                    triggerInput.setAttribute("maxlength", "30");
+                    triggerInput.setAttribute("minlength", "30");
+                }
+            });
+
+            // Trigger initial change to set placeholder based on the default selected organism
+            organismSelect.dispatchEvent(new Event('change'));
         });
 
         // JavaScript to handle drag and drop functionality
@@ -308,19 +339,20 @@
             });
 
         });
-    document.addEventListener("DOMContentLoaded", function() {
-        var questionMarks = document.querySelectorAll('.question-mark');
-        questionMarks.forEach(function(qm) {
-            qm.addEventListener('click', function() {
-                var tooltip = this.nextElementSibling;
-                if (tooltip.style.display === "none" || tooltip.style.display === "") {
-                    tooltip.style.display = "block"; /* Display the tooltip as a block element */
-                } else {
-                    tooltip.style.display = "none";
-                }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var questionMarks = document.querySelectorAll('.question-mark');
+            questionMarks.forEach(function(qm) {
+                qm.addEventListener('click', function() {
+                    var tooltip = this.nextElementSibling;
+                    if (tooltip.style.display === "none" || tooltip.style.display === "") {
+                        tooltip.style.display = "block"; /* Display the tooltip as a block element */
+                    } else {
+                        tooltip.style.display = "none";
+                    }
+                });
             });
         });
-    });
     </script>
 </body>
 </html>

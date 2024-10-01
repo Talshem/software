@@ -14,9 +14,24 @@ SMTP_PORT = 587
 SENDER_EMAIL_ADDRESS = 'igemtau2024@gmail.com'
 EMAIL_PASSWORD = "eefg btov iwsp xzgt"
 
+
 def send_email_with_attachment(results_df, to_email):
-    subject = 'ProTech WebTool Report'
-    body = 'Please find the attached Excel file with the results of your analysis.'
+    subject = 'REACT WebTool Analysis Report'
+    body = """
+    Dear User,
+
+    We are pleased to inform you that your analysis has been completed successfully. 
+
+    Please find attached the detailed report in Excel format, which contains the results of your toehold switch design and analysis based on free energy calculations and competition modeling. We hope this data provides valuable insights for your project.
+
+    If you have any questions or need further assistance, feel free to reach out to our support team.
+
+    Thank you for using the ProTech WebTool, and we look forward to assisting you in future analyses.
+
+    Best regards,
+    The ProTech Team
+    """
+
     msg = MIMEMultipart()
     msg['From'] = SENDER_EMAIL_ADDRESS
     msg['To'] = to_email

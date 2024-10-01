@@ -1,13 +1,11 @@
-import numpy as np
+
 import pandas as pd
 from fuzzysearch import find_near_matches
-
-from matplotlib import pyplot as plt
-import pickle
 from joblib import Parallel, delayed
 
+
 EDIT_DIST = 15
-def create_data(path_green,path_trans):
+def create_data(path_green, path_trans):
     table = pd.read_csv(path_green)
     transcripts = pd.read_csv(path_trans, sep='\t')
     table.rename(columns={'Unnamed: 0': 'id'}, inplace=True)
@@ -16,6 +14,7 @@ def create_data(path_green,path_trans):
         d = {'gene': seq_name, 'sequence': transcript.replace('T', 'U')}
         data.append(d)
     return table, data
+
 
 def build_seq_homology_dict(trigger, seq):
     return find_near_matches(trigger, seq, max_insertions=0, max_deletions=0, max_l_dist=EDIT_DIST)
@@ -45,11 +44,11 @@ def create_hist_time(table, data):
 def random_choice_trans(green_data):
     """RANDOM CHOICE OF TRIGGERS n=9000"""
     # Method 1 empirical dist of off_value
-    #vals = green_data.sort_values('off_value').reset_index().rename(columns={'off_value': 'prob'})['prob']
-    #emp_prob = vals.value_counts(normalize=True).reset_index().rename(columns={'index': 'off_value'})
-    #greenp = green_data.merge(emp_prob, on='off_value')
-    #idxs = greenp.sample(n=9000, weights='prob').index
-    #rand_data = green_data.loc[idxs]
+    vals = green_data.sort_values('off_value').reset_index().rename(columns={'off_value': 'prob'})['prob']
+    emp_prob = vals.value_counts(normalize=True).reset_index().rename(columns={'index': 'off_value'})
+    greenp = green_data.merge(emp_prob, on='off_value')
+    idxs = greenp.sample(n=9000, weights='prob').index
+    rand_data = green_data.loc[idxs]
 
     # Method 2 - built in python func
     rand_data = green_data.sample(n=90000, random_state=42)
@@ -57,16 +56,13 @@ def random_choice_trans(green_data):
 
 
 
-
-
-
-
 if __name__ == "__main__":
-    path_green = '/Users/netanelerlich/PycharmProjects/webTool/data/triggers_with_toeholds.csv'
+
+    """path_green = '/Users/netanelerlich/PycharmProjects/webTool/data/triggers_with_toeholds.csv'
     path_trans = "/Users/netanelerlich/PycharmProjects/webTool/data/Copy-of-All-transcription-units-of-E.-coli-BL21(DE3) - names.tsv"
     green_data, transcripts = create_data(path_green, path_trans)
     random_triggers = random_choice_trans(green_data)
-
+    """
     # SEARCH IN DATA
     """
     def run_slice(i):

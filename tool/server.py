@@ -1,23 +1,27 @@
+from .server_utils import process_file_stream
+
 import os
 import subprocess
 import json
-from wtforms import validators
 from flask_wtf import FlaskForm, CSRFProtect
-from werkzeug.utils import secure_filename
-from wtforms import StringField, BooleanField, SubmitField, SelectField
-from wtforms.validators import DataRequired, Length
-from flask import Flask, render_template, request, redirect, url_for, flash, abort, current_app, jsonify
+from wtforms.validators import DataRequired
+from flask import Flask, render_template, flash, request
 from flask_wtf.file import FileField
-from wtforms import StringField, TextAreaField, SubmitField
+from wtforms import StringField, SubmitField, BooleanField, SelectField, ValidationError, validators
+from .server_utils import validate_sequence_bool
 from google.cloud import storage
-from tool.server_utils import process_file_stream
+from flask import session
+from werkzeug.utils import secure_filename
+from .utils.seqeunce_consts import M_CHERRY_ORF, GFP_GENE
+
 
 
 # Initialize the Flask app
 app = Flask(__name__, template_folder='templates')
 csrf = CSRFProtect(app)
 csrf.init_app(app)
-app.config['SECRET_KEY'] = os.urandom(24)
+
+app.config['SECRET_KEY'] = 'shaniqua'
 app.config['MAX_CONTENT_LENGTH'] = 210 * 1024 * 1024  # 210 MB
 app.config['UPLOAD_EXTENSIONS'] = ['.fasta']
 
@@ -25,22 +29,87 @@ client = storage.Client()
 bucket_name = 'protech_bucket'
 bucket = client.get_bucket(bucket_name)
 
+
+def validate_trigger_length(form, field):
+    organism_type = form.cell_type.data
+    if not form.user_trigger_bool.data:
+        return True
+
+    if not field.data:
+        raise ValidationError("Trigger is required.")
+    if not validate_sequence_bool(field.data):
+        raise ValidationError("Invalid sequence.")
+
+    trigger_len = len(field.data)
+    trigger_bool = form.user_trigger_bool.data
+    if trigger_bool:
+        if organism_type == 'E.coli' and trigger_len != 23:
+            raise ValidationError("Trigger must be 23 nucleotides long for prokaryotes.")
+        elif organism_type in ['Saccharomyces cerevisiae', 'Homo sapiens'] and trigger_len != 30:
+            raise ValidationError("Trigger must be 30 nucleotides long for eukaryotes or humans.")
+    return True
+
+def validate_sequence(form, field):
+    if form.user_trigger_bool.data:
+        return True
+    if not field.data:
+        raise ValidationError("Sequence is required.")
+    if not validate_sequence_bool(field.data):
+        raise ValidationError("Invalid sequence.")
+    return True
+
+def validate_reporter(form, field):
+    if not field.data:
+        if form.optional_reporter.data == 'None':
+            raise ValidationError("Sequence is required or choose from optional reporters.")
+        else:
+            return True
+    else:
+        if form.optional_reporter.data != 'None':
+            raise ValidationError("Sequence is required or choose from optional reporters, can't input both.")
+        else:
+            return True
+    if not validate_sequence_bool(field.data):
+        raise ValidationError("Invalid sequence.")
+
+    return True
+
+
+def validate_file_format(form, filed):
+    if filed.data:
+        format = f'.{str(secure_filename(filed.data.filename)).split(".")[-1]}'
+        if format in ['.fasta', '.fa', '.fastq', '.gb', '.gbk', '.embl', '.phy', '.phylip', '.aln', '.nex',
+                      '.stockholm', '.tab',
+                      '.qual', '.abi', '.sff', '.xml', '.ig']:
+            return True
+        else:
+            raise ValidationError("Invalid format.")
+    else:
+        return True
+
+
 class InputForm(FlaskForm):
     email = StringField("Email", [DataRequired()], render_kw={"id": "email"})
-    target_seq = StringField("RNA sequence", validators=[DataRequired()], render_kw={"id": "gene"})
-    user_trigger_bool = BooleanField("Got a known trigger?", render_kw={"id": "user_trigger_bool"})
-    trigger = StringField("Input Trigger (23 nucleotides)", render_kw={"id": "trigger"}, validators=[validators.Length(min=23, max=23, message="Trigger must be 23 nucleotides long")])
-    reporter_gene = StringField("Reporter Gene", render_kw={"id": "reporter_gene"}, validators=[DataRequired()])
-    cell_type = SelectField("Organism Type",
-                            choices=[('Prokaryote', 'Prokaryote'), ('Eukaryote', 'Eukaryote'),
+    target_seq = StringField("RNA sequence", render_kw={"id": "gene"}, validators=[validate_sequence])
+    cell_type = SelectField("Organism", choices=[('E.coli', 'E.coli'), ("Saccharomyces cerevisiae", 'Saccharomyces cerevisiae'),
                                      ('Homo sapiens', 'Homo sapiens')], render_kw={"id": "cell_type"})
-    file = FileField('Transcripts File', render_kw={"id": "file"})
+    optional_reporter = SelectField("Optional Reporters",
+                            choices=[('None', 'None'), ('GFP', 'GFP'),('mCherry','mCherry')], render_kw={"id": "optional_reporter"})
+    user_trigger_bool = BooleanField("Got a known trigger?", render_kw={"id": "user_trigger_bool"})
+    trigger = StringField("Known Trigger", render_kw={"id": "trigger"}, validators=[validate_trigger_length])
+    reporter_gene = StringField("Reporter Gene Sequence", render_kw={"id": "reporter_gene"}, validators=[validate_reporter])
+    file = FileField('Transcripts File', render_kw={"id": "file"}, validators=[validate_file_format])
     submit = SubmitField("Submit")
+
 
 # Home page route
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
+
+@app.route('/success', methods=['GET'])
+def success_page():
+    return render_template('success.html')
 
 
 @app.route('/form', methods=['GET', 'POST'])
@@ -52,15 +121,27 @@ def user_data_getter():
     reporter_gene = None
     cell_type = None
     file = None
+    reporter_option = None
 
     input_form = InputForm()
     if input_form.validate_on_submit():
         try:
-            # Get the data from the form
             email = input_form.email.data
-            target_seq = input_form.target_seq.data.upper()
-            trigger = input_form.trigger.data.upper()
+            if trigger:
+                trigger = input_form.trigger.data.upper()
+            else:
+                target_seq = input_form.target_seq.data.upper()
+
             reporter_gene = input_form.reporter_gene.data.upper()
+            reporter_option = input_form.optional_reporter.data
+            if reporter_option != 'None':
+                reporter_gene = reporter_option
+            else:
+                if reporter_gene == 'GFP':
+                    reporter_gene = GFP_GENE
+                else:
+                    reporter_gene = M_CHERRY_ORF
+
             cell_type = input_form.cell_type.data
             user_trigger_bool = input_form.user_trigger_bool.data
             uploaded_file = input_form.file.data
@@ -75,8 +156,9 @@ def user_data_getter():
             s_user_trigger_bool = 'True' if user_trigger_bool else 'EMPTY'
 
             if uploaded_file:
+                format = f'.{str(secure_filename(uploaded_file.filename)).split(".")[-1]}'
                 try:
-                    s_file_dict = process_file_stream(uploaded_file)
+                    s_file_dict = process_file_stream(uploaded_file, format)
                 except Exception as e:
                     flash(f"Error processing file: {e} check validate sequences")
                     s_file_dict = None
@@ -85,10 +167,9 @@ def user_data_getter():
                 s_file_dict = "EMPTY"
 
             # TODO: ADD SUBPROCESS ID
-            subprocess.run(['python', 'tool/generate.py', s_email, s_target_seq, s_trigger, s_reporter_gene, s_cell_type,
+            subprocess.run(['python', 'generate.py', s_email, s_target_seq, s_trigger, s_reporter_gene, s_cell_type,
                             s_user_trigger_bool, s_file_dict],
                            text=True)
-
             print("Subprocess ran successfully")
             input_form.email.data = ''
             input_form.target_seq.data = ''
@@ -97,11 +178,15 @@ def user_data_getter():
             input_form.user_trigger_bool.data = ''
             input_form.cell_type.data = ''
             input_form.file.data = ''
+
             flash('Form submitted successfully. Job accepted.')
         except Exception as e:
             flash(f"Error processing form: {e}")
 
+
     return render_template('form.html', input_form=input_form)
+
+
 
 # Error Handling
 @app.errorhandler(404)
@@ -114,4 +199,4 @@ def internal_error(e):
 
 
 if __name__ == '__main__':
-    app.run(port=3000)
+    app.run(debug=True)

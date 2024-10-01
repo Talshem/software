@@ -1,12 +1,5 @@
 import itertools
-import time
 from random import choice
-
-from fuzzysearch import find_near_matches
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 
 
 class Suffixtree:
