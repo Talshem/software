@@ -1,10 +1,6 @@
 import numpy as np
-import pickle
-import pandas as pd
-import os
 import re
 import pickle
-from utils.binary_search import is_within_mismatches, is_in_genome, get_similar_transcripts
 
 
 def build_suffix_array(elements):

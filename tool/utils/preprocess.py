@@ -2,23 +2,9 @@ import itertools
 import pickle
 from datetime import datetime
 from multiprocessing import Pool
-from random import random
 
-import matplotlib.pyplot as plt
-import pandas as pd
-from Bio.SeqUtils import gc_fraction as GC
-import sys
-from Bio import pairwise2, SeqIO
-from Bio.pairwise2 import format_alignment
-import numpy as np
-import json
-import Levenshtein as lev
-from fuzzysearch import find_near_matches
-import re
 from Bio import Align
-from Bio.pairwise2 import format_alignment
-import os
-from utils.suffix_tree import Suffixtree
+from .utils.suffix_tree import Suffixtree
 
 
 def find_similar_sequences_bio(trigger: str, sequences_dict: dict[str:str]) -> Align.Alignment:

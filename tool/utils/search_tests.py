@@ -1,13 +1,11 @@
 import pickle
 import random
 import time
-import numpy as np
 import pickle
 
-from tool.generate import find_homology
+#from .generate import find_homology
 from itertools import combinations
-import matplotlib.pyplot as plt
-from tool.generate import find_near_matches, build_homology_map
+from .generate import find_near_matches, build_homology_map
 
 
 def homo_sapiens_search_plot(edit_distance, trigger_len=23):
