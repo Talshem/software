@@ -3,6 +3,7 @@ from switch_generator import SwitchGenerator
 from prokaryotic_switch_generator import ProkaryoticSwitchGenerator
 from window_folding_based_selection import get_gene_top_ranked_windows
 from utils.send_mail import send_email_with_attachment as send
+from eukaryotic_score_calculator import EukaryoticScoreCalculator
 from server import bucket
 
 import json
@@ -16,6 +17,7 @@ from fuzzysearch import find_near_matches
 from joblib import Parallel, delayed
 import time
 import sys
+from server import bucket
 from RNA import RNA
 from nupack import *
 config.threads = 8
@@ -28,12 +30,14 @@ E_COLI_DATA_PATH = "Escherichia_coli_ASM886v2.pkl"
 HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
 YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
 
+model_path = "/workspace/tool/files/webtool_model.txt"
+feature_path = "/workspace/tool/files/model_features.txt"
+
 DATA_PATHS = {
     "E.coli": E_COLI_DATA_PATH,
     "Homo sapiens": HUMAN_DATA_PATH,
     "Saccharomyces cerevisiae": YEAST_DATA_PATH
 }
-
 
 
 """
@@ -91,14 +95,11 @@ def extract_top_homology_sequences(triggers_homology_mapping):
             )
 
         homo_dfs.append(trig_res_df)
-
-    # RRF calculation with valid checks
+    # Competition RRF calculation with valid checks
     higher = ['homologous_trigger_mfe']
     lower = ['distance']
-    print(homo_dfs)
     if not homo_dfs:
         return []
-
     rrf_rank = [RRF(trigger_homology_df, higher, lower, index='sequence') for trigger_homology_df in homo_dfs]
     return rrf_rank
 
@@ -151,26 +152,80 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
         raise RuntimeError(f"Error extracting top homology sequences: {e}")
 
     # Filter triggers
-    n_switch = min(SWITCH_BATCH, 1)
+    n_switch = SWITCH_BATCH
 
     homology_sequences = [ranked_df['sequence'].get(0) for ranked_df in rrf_ranks][:n_switch]
     triggers_seqs = triggers_seqs[:n_switch]
 
     # Generate switches safely
-    try:
-        s_switch = time.time()
-        switch_res = Parallel(n_jobs=4)(delayed(generate_switch)(f_trigger, f_top_homology_sequence, reporter_gene, cell_type)
-                                        for f_trigger, f_top_homology_sequence in zip(triggers_seqs, homology_sequences))
-        e_switch = time.time()
-        print(f'Switch generation time= {e_switch - s_switch} seconds, for {SWITCH_BATCH} switches')
-    except Exception as e:
-        raise RuntimeError(f"Error generating switches: {e}")
+    s_switch = time.time()
+    switch_res = Parallel(n_jobs=4)(delayed(generate_switch)(f_trigger, f_top_homology_sequence, reporter_gene, cell_type)
+                                    for f_trigger, f_top_homology_sequence in zip(triggers_seqs, homology_sequences))
+    e_switch = time.time()
+    print(f'Switch generation time= {e_switch - s_switch} seconds, for {SWITCH_BATCH} switches')
+    print(results)
     print(switch_res)
     results[['switch',  "complex_concentration"]] = pd.DataFrame(switch_res, columns=['switch', "complex_concentration"])
+    print(results)
+    print()
+    regg_results = {'Fold Change Toehold Score': []}
+    score_calculator = get_score_calc(cell_type)
+    for switch, trigger in zip(list(results['switch']), triggers_seqs):
+        print(switch, trigger)
+        score = score_calculator.get_score(switch, trigger)
+        regg_results['Fold Change Toehold Score'].append(score)
+    regg_results_df = pd.DataFrame(regg_results)
 
+    results['Fold Change Toehold Score'] = regg_results_df['Fold Change Toehold Score']
+    print(results.head(n_switch))
     # Prepare and send the report
-    prepare_and_send_report(results, rrf_ranks, email)
+    prepare_and_send_report(results.head(n_switch), rrf_ranks, email)
     return
+
+def get_score_calc(cell_type):
+    with open(feature_path, 'r') as file:
+        feature_f = file.read()
+    feature_list = eval(feature_f)
+
+    if cell_type == 'E.coli':
+        prokaryotes = {
+            "ideal_stem_structure": '..............((((((((((...((((((...........))))))...))))))))))',
+            "trigger_binding_site_start": 3,
+            "trigger_binding_site_end": 32,
+            "stem_start": 14,
+            "stem_end": 62,
+            "loop_start": 33,
+            "loop_end": 43,
+            "stem_top_start": 27,
+            "stem_top_end": 49
+        }
+        args = tuple(prokaryotes.values())
+        score_gen = EukaryoticScoreCalculator(model_path, feature_list, *args)
+    else:
+        eukaryotes = {
+            "ideal_stem_structure": '........(((((((((((((((............)))))))))))...',
+            "trigger_binding_site_start": 0,
+            "trigger_binding_site_end": 22,
+            "stem_start": 8,
+            "stem_end": 49,
+            "loop_start": 23,
+            "loop_end": 34,
+            "stem_top_start": 17,
+            "stem_top_end": 40
+        }
+        args = tuple(eukaryotes.values())
+        score_gen = EukaryoticScoreCalculator(model_path, feature_list, *args)
+    return score_gen
+
+
+
+
+
+
+
+
+
+
 
 
 def RRF(ranking_df, higher_is_better_cols, lower_is_better_cols, index, k=60):
@@ -277,11 +332,11 @@ def find_homology(sequence, genome_data):
 
 
 def generate_switch(trigger, homologous_sequence, reporter_gene, cell_type):
+    print(type(trigger), type(homologous_sequence), type(reporter_gene), type(cell_type))
     # Validate inputs
     if not isinstance(trigger, str) or not trigger:
         logging.error("Invalid trigger sequence provided.")
         return None, None
-    print(homologous_sequence)
 
     if not isinstance(reporter_gene, str) or not reporter_gene:
         logging.error("Invalid reporter gene provided.")
@@ -305,6 +360,9 @@ def generate_switch(trigger, homologous_sequence, reporter_gene, cell_type):
 
 
 def prepare_and_send_report(df_results, rrf_ranks, email):
+    print(df_results)
+    print(rrf_ranks)
+
     # Validate inputs
     if not isinstance(df_results, pd.DataFrame):
         logging.error("df_results must be a pandas DataFrame.")
@@ -321,7 +379,6 @@ def prepare_and_send_report(df_results, rrf_ranks, email):
         "switch": "Switch",
         "sequence": "Competitor Sequence",
         "mfe_score": "Trigger mfe Score",
-        # Add regressor results here
         "sequence_RRF": "Competition Score",
         "distance": "Substitution Distance",
         "idx": "Competitor Location",
@@ -340,15 +397,17 @@ def prepare_and_send_report(df_results, rrf_ranks, email):
 
         final_df = pd.concat(combined_rows, ignore_index=True).rename(columns=rename_dict)
         final_df = final_df[cols_rearrange]
-
+        print(final_df)
         # Send the report via the send() function
         send(final_df, email)
+
+
     except Exception as e:
         logging.error(f"Error preparing or sending report: {e}")
 
 
 if __name__ == '__main__':
-    # Get the arguments from the user form.
+    """# Get the arguments from the user form.
     s_mail = sys.argv[1]
     s_target_seq = sys.argv[2]
     s_trigger = sys.argv[3]
@@ -357,4 +416,13 @@ if __name__ == '__main__':
     s_user_trigger_boo = sys.argv[6]
     s_transcripts_list = sys.argv[7]
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
-
+    """
+    # for development generate inputs
+    s_mail = 'erlichnet57@gmail.com'
+    s_target_seq = "ATGCGTACGTTATGCGTACGTTATGCGTACGTTATGCGTACGTTATGCGTACGTT"
+    s_trigger = 'EMPTY'
+    s_reporter_gene = "ATGCGTACGTTATGCGTACGTTATGCGTACGTTATGCGTACGTTATGCGTACGTT"
+    s_cell_type = 'E.coli'
+    s_user_trigger_boo = 'EMPTY'
+    s_transcripts_list = 'EMPTY'
+    route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
