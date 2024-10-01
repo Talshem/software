@@ -1,8 +1,8 @@
-from server_utils import process_file_stream
-from utils.seqeunce_consts import M_CHERRY_ORF, GFP_GENE
-from server_utils import validate_sequence_bool
+from io import StringIO
+from Bio import SeqIO
 
 import os
+import re
 import subprocess
 import json
 from flask_wtf import FlaskForm, CSRFProtect
@@ -26,6 +26,58 @@ app.config['UPLOAD_EXTENSIONS'] = ['.fasta']
 client = storage.Client()
 bucket_name = 'protech_bucket'
 bucket = client.get_bucket(bucket_name)
+GFP_GENE = "ATGCGTAAAGGAGAAGAACTTTTCACTGGAGTTGTCCCAATTCTTGTTGAATTAGATGGTGATGTTAATGGGCACAAATTTTCTGTCAGTGGAGAGGGTGAAGGTGATGCAACATACGGAAAACTTACCCTTAAATTTATTTGCACTACTGGAAAACTACCTGTTCCGTGGCCAACACTTGTCACTACTTTCGGTTATGGTGTTCAATGCTTTGCGAGATACCCAGATCACATGAAACAGCATGACTTTTTCAAGAGTGCCATGCCCGAAGGTTACGTACAGGAAAGAACTATATTTTTCAAAGATGACGGGAACTACAAGACACGTGCTGAAGTCAAGTTTGAAGGTGATACCCTTGTTAATAGAATCGAGTTAAAAGGTATTGATTTTAAAGAAGATGGAAACATTCTTGGACACAAATTGGAATACAACTATAACTCACACAATGTATACATCATGGCAGACAAACAAAAGAATGGAATCAAAGTTAACTTCAAAATTAGACACAACATTGAAGATGGAAGCGTTCAACTAGCAGACCATTATCAACAAAATACTCCGATTGGCGATGGCCCTGTCCTTTTACCAGACAACCATTACCTGTCCACACAATCTGCCCTTTCGAAAGATCCCAACGAAAAGAGAGACCACATGGTCCTTCTTGAGTTTGTAACCGCTGCTGGGATTACACATGGCATGGATGAACTATACAAA".replace('T', 'U')
+M_CHERRY_ORF = "AUGGUGAGCAAGGGCGAGGAGGACAACAUGGCCAUCAUCAAGGAGUUCAUGCGGUUCAAGGUGCACAUGGAGGGCAGCGUGAACGGCCACGAGUUCGAGAUCGAGGGCGAGGGCGAGGGCCGGCCCUACGAGGGCACCCAGACCGCCAAGCUGAAGGUGACCAAGGGCGGCCCCCUGCCCUUCGCCUGGGACAUCCUGAGCCCCCAGUUCAUGUACGGCAGCAAGGCCUACGUGAAGCACCCCGCCGACAUCCCCGACUACCUGAAGCUGAGCUUCCCCGAGGGCUUCAAGUGGGAGCGGGUGAUGAACUUCGAGGACGGCGGCGUGGUGACCGUGACCCAGGACAGCAGCCUGCAGGACGGCGAGUUCAUCUACAAGGUGAAGCUGCGGGGCACCAACUUCCCCAGCGACGGCCCCGUGAUGCAGAAGAAGACCAUGGGCUGGGAGGCCAGCAGCGAGCGGAUGUACCCCGAGGACGGCGCCCUGAAGGGCGAGAUCAAGCAGCGGCUGAAGCUGAAGGACGGCGGCCACUACGACGCCGAGGUGAAGACCACCUACAAGGCCAAGAAGCCCGUGCAGCUGCCCGGCGCCUACAACGUGAACAUCAAGCUGGACAUCACCAGCCACAACGAGGACUACACCAUCGUGGAGCAGUACGAGCGGGCCGAGGGCCGGCACAGCACCGGCGGCAUGGACGAGCUGUACAAGAGCGGCAACUGA"
+
+def process_file_stream(file_stream, file_format):
+    parse_inputs_dict = {
+        ".fasta": "fasta",  # FASTA format
+        ".fa": "fasta",  # FASTA format (alternative extension)
+        ".fastq": "fastq",  # FASTQ format
+        ".gb": "genbank",  # GenBank format
+        ".gbk": "genbank",  # GenBank format (alternative extension)
+        ".embl": "embl",  # EMBL format
+        ".phy": "phylip",  # PHYLIP format
+        ".phylip": "phylip",  # PHYLIP format (alternative extension)
+        ".aln": "clustal",  # ClustalW format
+        ".nex": "nexus",  # NEXUS format
+        ".stockholm": "stockholm",  # Stockholm format
+        ".tab": "tab",  # Tab-delimited format
+        ".qual": "qual",  # FASTA quality scores
+        ".abi": "abi",  # ABI chromatogram files
+        ".sff": "sff",  # Standard Flowgram Format
+        ".xml": "uniprot-xml",  # Uniprot XML format
+        ".ig": "ig"  # IntelliGenetics format
+    }
+    parse_format = parse_inputs_dict[file_format]
+    genes_list = []
+
+    # Decode the file stream to text if needed (depending on its format)
+    file_content = file_stream.read().decode("utf-8")
+    handle = StringIO(file_content)
+
+    for record in SeqIO.parse(handle, parse_format):
+        seq_record = {}
+        seq_record['gene'] = record.id
+        try:
+            seq_record['sequence'] = validate_sequence(str(record.seq))
+        except ValueError as e:
+             # TODO: send mail to user noteing the error?
+             raise ValueError(f"Error in processing file: {e}")
+        seq_record['protein'] = ''
+        genes_list.append(seq_record)
+    return genes_list
+
+def validate_sequence(sequence):
+    if not re.search(r"^[ACGUTactgu]", sequence):
+        raise ValueError("Invalid sequence: must contain only A, C, G, or T, U , a ,c,t,g,u nucleotides.")
+    return sequence
+
+
+
+def validate_sequence_bool(sequence):
+    return bool(re.fullmatch(r"[ACGUTacgut]+", sequence))
+
 
 def validate_trigger_length(form, field):
     organism_type = form.cell_type.data
