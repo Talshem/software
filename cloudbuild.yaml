@@ -12,9 +12,14 @@
         echo "$(gcloud secrets versions access latest --secret="GITHUB_TOKEN")" | gh auth login --with-token
         echo "${{secrets.CREDENTIALS_JSON}}" | base64 -d > /workspace/tool/credentials.json 
         gcloud auth activate-service-account --key-file=/workspace/tool/credentials.json
-        gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /workspace/nupack-4.0.1.12.zip 
+        gsutil cp gs://protech_bucket/nupack-4.0.1.12.zip /workspace/nupack-4.0.1.12.zip
+        gsutil cp gs://protech_bucket/PyFeat-master.zip /workspace/PyFeat-master.zip
+        gsutil cp gs://protech_bucket/webtool_model.txt /workspace/tool/files/webtool_model.txt
+        gsutil cp gs://protech_bucket/model_features.txt /workspace/tool/files/model_features.txt
         unzip /workspace/nupack-4.0.1.12.zip -d /workspace
+        unzip /workspace/PyFeat-master.zip -d /workspace
         rm /workspace/nupack-4.0.1.12.zip
+        rm /workspace/PyFeat-master.zip
 
   # Install Miniconda and NUPACK
   - name: 'ubuntu'
