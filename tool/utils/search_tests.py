@@ -3,9 +3,9 @@ import random
 import time
 import pickle
 
-from .generate import find_homology
+from generate import find_homology
 from itertools import combinations
-from .generate import find_near_matches, build_homology_map
+from generate import find_near_matches, build_homology_map
 
 
 def homo_sapiens_search_plot(edit_distance, trigger_len=23):

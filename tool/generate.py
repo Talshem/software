@@ -50,7 +50,6 @@ DATA_PATHS = {
 """
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
-
 def extract_top_homology_sequences(triggers_homology_mapping):
     print(triggers_homology_mapping)
     if not isinstance(triggers_homology_mapping, list):
