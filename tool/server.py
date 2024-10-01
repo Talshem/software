@@ -12,7 +12,7 @@ from flask import Flask, render_template, flash, request
 from flask_wtf.file import FileField
 from wtforms import StringField, SubmitField, BooleanField, SelectField, ValidationError, validators
 from werkzeug.utils import secure_filename
-from google.cloud import storage
+#from google.cloud import storage
 from flask import session
 
 # Initialize the Flask app
