@@ -167,7 +167,7 @@ def user_data_getter():
                 s_file_dict = "EMPTY"
 
             # TODO: ADD SUBPROCESS ID
-            subprocess.run(['python', 'generate.py', s_email, s_target_seq, s_trigger, s_reporter_gene, s_cell_type,
+            subprocess.run(['python', 'tool/generate.py', s_email, s_target_seq, s_trigger, s_reporter_gene, s_cell_type,
                             s_user_trigger_bool, s_file_dict],
                            text=True)
             print("Subprocess ran successfully")
