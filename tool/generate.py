@@ -358,6 +358,7 @@ def prepare_and_send_report(df_results, rrf_ranks, email):
 
 if __name__ == '__main__':
     # Get the arguments from the user form.
+
     """
     s_mail = sys.argv[1]
     s_target_seq = sys.argv[2]
@@ -369,7 +370,7 @@ if __name__ == '__main__':
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
     """
 
-    route_input('erlichnet57@gmail.com', 'ATGCGTACGATGCGTACGATGCGTACGATGCGTACGATGCGTACGATGCGTACGATGCGTACGATGCGTACG',
+    route_input('erlichnet57@gmail.com', 'ATGCGTACGATGCGTACGATGCGTACGATGCGTACGATGCGTACGATGCGTACGATGCGTACGATGCGTACGGCGTACGATGCGTACGATGCGTACGGCGTACGATGCGTACGATGCGTACG',
                 'EMPTY', 'ATGCGTACGATGCGTACGATGCGTACGATGCGTACGAGATGAATGATA',
                 'E.coli', 'True', 'EMPTY')
 
