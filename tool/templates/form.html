@@ -8,7 +8,7 @@
     <style type = "text/css">
         h1 {
             margin-bottom: 20px;
-            font-size: 15em;
+            font-size: 8em;
             font-family: Trebuchet MS, sans-serif;
             justify-content: center;
             align-items: center;
@@ -100,6 +100,7 @@
     </style>
 </head>
 <body>
+    <!-- Replace the title with an image -->
     {% include 'navbar.html' %} <!-- Include the navbar.html template -->
     <div class="container">
        <h1>ToREC</h1>
@@ -204,12 +205,20 @@
                         {{ input_form.file.errors[0] }}
                     </div>
                 {% endif %}
+
+
             </div>
 
             <!-- Submit Button -->
             {{ input_form.submit(class="btn btn-primary") }}
+             <div style="height: 100px;"></div>
         </form>
     </div>
+
+
+
+
+
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
@@ -356,6 +365,22 @@
                 });
             });
         });
+
+
+
+
+
     </script>
+
+
+
+
+
 </body>
+
+
+
+
+
+
 </html>

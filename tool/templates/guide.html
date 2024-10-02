@@ -14,14 +14,21 @@
         }
         .image-placeholder {
             width: 100%;
-            height: 300px;
-            background-color: #ddd;
+            height: auto; /* Automatically adjust height to the image size */
+            padding: 0; /* Remove padding */
+            margin: 0; /* Remove margin */
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #555;
-            margin-bottom: 20px;
         }
+
+        .image-placeholder img {
+            width: 100%; /* Ensure the image stretches to the container's full width */
+            height: auto; /* Maintain aspect ratio */
+            display: block; /* Ensures no extra margin around the image */
+            border: none; /* Remove any default border */
+        }
+
         .note {
             font-size: 0.9em;
             color: #555;
@@ -37,7 +44,7 @@
         In the first field, you should enter your email address. This is important so that results can be sent to you after the form is processed.
     </p>
     <div class="image-placeholder">
-        [Placeholder for email input image]
+        <img src="path_to_image/email_input.png" alt="Email Input Image">
     </div>
 
     <h2>Step 2: Provide the Target RNA Sequence</h2>
@@ -48,7 +55,7 @@
         Note: If you enter characters outside of these (e.g., numbers or special symbols), the form will return an error indicating the sequence is invalid.
     </p>
     <div class="image-placeholder">
-        [Placeholder for RNA sequence input image]
+        <img src="path_to_image/rna_sequence_input.png" alt="RNA Sequence Input Image">
     </div>
 
     <h2>Step 3: Select the Organism Type</h2>
@@ -56,7 +63,7 @@
         Choose the organism type from the dropdown list. Options include *E.coli* (prokaryote), *Saccharomyces cerevisiae* (yeast), and *Homo sapiens* (human).
     </p>
     <div class="image-placeholder">
-        [Placeholder for organism selection image]
+        <img src="path_to_image/organism_selection.png" alt="Organism Selection Image">
     </div>
 
     <h2>Step 4: Choose an Optional Reporter Gene</h2>
@@ -67,7 +74,7 @@
         Note: If you provide a reporter gene sequence manually, you cannot select one from this list, and vice versa. You can only choose one option.
     </p>
     <div class="image-placeholder">
-        [Placeholder for reporter selection image]
+        <img src="path_to_image/reporter_selection.png" alt="Reporter Gene Selection Image">
     </div>
 
     <h2>Step 5: Specify if You Have a Known Trigger Sequence</h2>
@@ -75,14 +82,14 @@
         Indicate whether you have a known trigger sequence. If so, check the box labeled "Got a known trigger?" and enter the trigger sequence in the provided input field. Make sure the sequence length matches the organism type you selected:
     </p>
     <ul>
-        <li>For *E.coli*, the trigger must be exactly 23 nucleotides long.</li>
-        <li>For *Saccharomyces cerevisiae* or *Homo sapiens*, the trigger must be 30 nucleotides long.</li>
+        <li>For E.coli, the trigger must be exactly 23 nucleotides long.</li>
+        <li>For Saccharomyces cerevisiae or Homo sapiens, the trigger must be 30 nucleotides long.</li>
     </ul>
     <p class="note">
         Note: If you provide a trigger sequence that does not match the required length, you will receive an error message.
     </p>
     <div class="image-placeholder">
-        [Placeholder for trigger sequence input image]
+        <img src="./im/trigger.png" alt=Trigger Sequence Input Image">
     </div>
 
     <h2>Step 6: Enter the Reporter Gene Sequence</h2>
@@ -93,7 +100,7 @@
         Note: You cannot input both a reporter gene sequence and select an optional reporter at the same time. You must choose one or the other.
     </p>
     <div class="image-placeholder">
-        [Placeholder for reporter gene input image]
+        <img src="path_to_image/reporter_gene_input.png" alt="Reporter Gene Input Image">
     </div>
 
     <h2>Step 7: Upload Your Transcript File</h2>
@@ -104,7 +111,7 @@
         Note: If you upload a file in an unsupported format, the form will return an error indicating the file format is invalid.
     </p>
     <div class="image-placeholder">
-        [Placeholder for file upload input image]
+        <img src="path_to_image/file_upload_input.png" alt="File Upload Input Image">
     </div>
 
     <h2>Step 8: Submit the Form</h2>
@@ -112,7 +119,7 @@
         Once all the required fields are completed, click the "Submit" button to submit the form for processing. You will receive the results via email based on the input you provided.
     </p>
     <div class="image-placeholder">
-        [Placeholder for form submission image]
+        <img src="path_to_image/form_submission.png" alt="Form Submission Image">
     </div>
 
 </body>
