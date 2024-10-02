@@ -34,7 +34,7 @@ HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
 YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
 
 
-# for development
+#for development
 #model_path = "/Users/netanelerlich/Desktop/IGEM/webtool_model.txt"
 #feature_path = "/Users/netanelerlich/Desktop/IGEM/model_features.txt"
 #E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
@@ -47,7 +47,6 @@ DATA_PATHS = {
     "Homo sapiens": HUMAN_DATA_PATH,
     "Saccharomyces cerevisiae": YEAST_DATA_PATH
 }
-
 
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -100,7 +99,7 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     # Basic input validation
     if not isinstance(email, str) or "@" not in email:
         raise ValueError("Invalid email provided")
-    #print(email,target_seq,trigger,reporter_gene,cell_type,user_trigger_boo,transcripts_list)
+
 
 
     results = pd.DataFrame()
