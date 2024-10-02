@@ -37,6 +37,13 @@
 </head>
 <body>
 
+    {% include 'navbar.html' %} <!-- Include the navbar.html template -->
+
+    <div class="container">
+        <div class="logo-container" style="margin-top: 20px;">
+            <img src="im/logo_torec.png" alt="ToREC Logo" class="logo" width="500" height="220">
+        </div>
+
     <h1>User Guide: Input Form for RNA Sequence Analysis</h1>
 
     <h2>Step 1: Enter Your Email Address</h2>
@@ -89,7 +96,7 @@
         Note: If you provide a trigger sequence that does not match the required length, you will receive an error message.
     </p>
     <div class="image-placeholder">
-        <img src="./im/trigger.png" alt=Trigger Sequence Input Image">
+        <img src="im/trigger.png" alt=Trigger Sequence Input Image">
     </div>
 
     <h2>Step 6: Enter the Reporter Gene Sequence</h2>

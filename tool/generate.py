@@ -36,8 +36,6 @@ feature_path = "/workspace/tool/files/model_features.txt"
 #model_path = "/Users/netanelerlich/Desktop/IGEM/webtool_model.txt"
 #feature_path = "/Users/netanelerlich/Desktop/IGEM/model_features.txt"
 
-
-
 DATA_PATHS = {
     "E.coli": E_COLI_DATA_PATH,
     "Homo sapiens": HUMAN_DATA_PATH,
@@ -50,13 +48,8 @@ DATA_PATHS = {
 E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
 HUMAN_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Homo_sapiens_GRCh38.pkl"
 YEAST_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Saccharomyces_cerevisiae_S288C.pkl"
-
-DATA_PATHS = {
-    "E.coli": E_COLI_DATA_PATH,
-    "Homo sapiens": HUMAN_DATA_PATH,
-    "Saccharomyces cerevisiae": YEAST_DATA_PATH
-    }
 """
+
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 def extract_top_homology_sequences(triggers_homology_mapping):
@@ -116,10 +109,11 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     file_like_obj = io.BytesIO(bytes_data)
     cell_type_transcripts = pickle.load(file_like_obj)
 
-    """""
+    """"
     with open(blob_name,'rb') as f:
         cell_type_transcripts = pickle.load(f)
     """
+
     # Update transcripts_list
     if transcripts_list != 'EMPTY':
         transcripts_list = json.loads(transcripts_list)
@@ -152,12 +146,8 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     rrf_ranks = extract_top_homology_sequences(homo_res)
 
     # Top (triggers, homology) -> switch design
-    homology_sequences_final = [ranked_df['sequence'].iloc[-1] for ranked_df in rrf_ranks][:n_switch]
-    print(homology_sequences_final)
-    homology_sequences_final_score = [ranked_df['sequence_RRF'].iloc[-1] for ranked_df in rrf_ranks][:n_switch]
-    print(homology_sequences_final_score)
-
-
+    homology_sequences_final = [ranked_df['sequence'].iloc[0] if len(ranked_df) > 0 else None for ranked_df in rrf_ranks][:n_switch]
+    homology_sequences_final_score = [ranked_df['sequence_RRF'].iloc[0] if len(ranked_df) > 0 else None for ranked_df in rrf_ranks][:n_switch]
 
     triggers_sequences_final = triggers_sequences[:n_switch]
 
@@ -382,12 +372,14 @@ def concat_tables(df_results, rrf_ranks):
                      'Competitor Trigger MFE']
 
     final_df = final_df[rearnage_cols]
+    print(final_df.to_string())
     return final_df
 
 
 
 if __name__ == '__main__':
     # Get the arguments from the user form.
+
     s_mail = sys.argv[1]
     s_target_seq = sys.argv[2]
     s_trigger = sys.argv[3]
@@ -396,12 +388,12 @@ if __name__ == '__main__':
     s_user_trigger_boo = sys.argv[6]
     s_transcripts_list = sys.argv[7]
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
-
-
     # for development generate inputs
+
+
     """
-    s_mail = ''
-    s_target_seq = "GAAACGCATTAGCACCACCATTACCACCACCATCACCACCACCATCACCATTACCATTACCACAGGTAACGGTGCGGGCTG"
+    s_mail = 'erlichnet57@gmail.com'
+    s_target_seq = "ATTTTAGGGCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGGGGGTTTTTGTGTGTGTGTGTGTGTTGTGTGTGTTGTGTGTGTGTGT"
     s_trigger = 'EMPTY'
     s_reporter_gene = "ATGCGTACGTTATGCGTACGTTATGCGTACGTTATGCGTACGTTATGCGTACGTT"
     s_cell_type = 'E.coli'
