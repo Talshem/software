@@ -17,7 +17,7 @@ from fuzzysearch import find_near_matches
 from joblib import Parallel, delayed
 import time
 import sys
-from server import bucket
+
 from RNA import RNA
 from nupack import *
 config.threads = 8
@@ -33,14 +33,19 @@ YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
 model_path = "/workspace/tool/files/webtool_model.txt"
 feature_path = "/workspace/tool/files/model_features.txt"
 
+#model_path = "/Users/netanelerlich/Desktop/IGEM/webtool_model.txt"
+#feature_path = "/Users/netanelerlich/Desktop/IGEM/model_features.txt"
+
+
+
 DATA_PATHS = {
     "E.coli": E_COLI_DATA_PATH,
     "Homo sapiens": HUMAN_DATA_PATH,
     "Saccharomyces cerevisiae": YEAST_DATA_PATH
 }
 
-
 """
+
 # for development
 E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
 HUMAN_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Homo_sapiens_GRCh38.pkl"
@@ -55,10 +60,6 @@ DATA_PATHS = {
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 def extract_top_homology_sequences(triggers_homology_mapping):
-    print(triggers_homology_mapping)
-    if not isinstance(triggers_homology_mapping, list):
-        raise ValueError("Expected a list for 'triggers_homology_mapping'")
-
     homo_dfs = []
     for trigger_homology in triggers_homology_mapping:
         if trigger_homology:
@@ -77,16 +78,14 @@ def extract_top_homology_sequences(triggers_homology_mapping):
             else:
                 matches_df = pd.DataFrame(trigger_all_matches[0])
 
-                # Ensure mfe calculation is safe
                 mfe_dict = {'homologous_trigger_mfe': []}
                 for homos in trigger_all_matches[0]:
-                    if 'sequence' in homos:
+                    if 'sequence' in homos.keys():
                         homo_trigger = homos['sequence']
                         structure, mfe = RNA.fold(homo_trigger)
                         mfe_dict['homologous_trigger_mfe'].append(mfe)
                     else:
                         mfe_dict['homologous_trigger_mfe'].append(None)
-
                 mfe_df = pd.DataFrame(mfe_dict)
                 trig_res_df = pd.concat([matches_df, mfe_df], axis=1)
         else:
@@ -95,6 +94,7 @@ def extract_top_homology_sequences(triggers_homology_mapping):
             )
 
         homo_dfs.append(trig_res_df)
+
     # Competition RRF calculation with valid checks
     higher = ['homologous_trigger_mfe']
     lower = ['distance']
@@ -108,8 +108,6 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     # Basic input validation
     if not isinstance(email, str) or "@" not in email:
         raise ValueError("Invalid email provided")
-    if not isinstance(target_seq, str) or not target_seq:
-        raise ValueError("Invalid target sequence provided")
 
     results = pd.DataFrame()
     blob_name = DATA_PATHS.get(cell_type)
@@ -118,6 +116,10 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     file_like_obj = io.BytesIO(bytes_data)
     cell_type_transcripts = pickle.load(file_like_obj)
 
+    """""
+    with open(blob_name,'rb') as f:
+        cell_type_transcripts = pickle.load(f)
+    """
     # Update transcripts_list
     if transcripts_list != 'EMPTY':
         transcripts_list = json.loads(transcripts_list)
@@ -125,68 +127,73 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     else:
         transcripts_list = cell_type_transcripts
 
-    # Get optional triggers if user hasn't provided one
-    triggers_with_mfe = np.array([[trigger, 1]])
+    # Get optional triggers
+    triggers_with_mfe_df = [[trigger, None]]
+    n_switch = 1
     if user_trigger_boo == 'EMPTY':
         cell_window = 30 if cell_type == 'E.coli' else 23
+        n_switch = SWITCH_BATCH
+        n_triggers = TRIGGERS_BATCH
+
         optional_triggers_df = get_gene_top_ranked_windows(target_seq, window_size=cell_window)
-        n_triggers = min(TRIGGERS_BATCH, len(optional_triggers_df.index))
-        triggers_with_mfe = np.array(optional_triggers_df.iloc[:n_triggers, :][["window_sequence", "mfe_score"]])
+        n_triggers = min(n_triggers, len(optional_triggers_df.index))
+        triggers_with_mfe_df = (optional_triggers_df.iloc[:n_triggers, :][["window_sequence", "mfe_score"]].
+                                reset_index(drop=True)).rename(columns={"window_sequence": "Trigger",
+                                                                        "mfe_score": "Trigger MFE Score"})
 
-    results[['trigger_window', 'mfe_score']] = triggers_with_mfe
-    triggers_seqs = triggers_with_mfe[:, 0]
+    # Extract triggers
+    triggers_with_mfe = np.array(triggers_with_mfe_df)
+    triggers_sequences = triggers_with_mfe[:, 0]
 
-    # Homology search with error handling
-    try:
-        s_h = time.time()
-        homo_res = Parallel(n_jobs=-1)(delayed(find_homology)(trigger, transcripts_list) for trigger in triggers_seqs)
-        e_h = time.time()
-        print(f'Homology search time= {e_h - s_h} seconds, n_triggers = {len(triggers_seqs)}, cell= {cell_type}')
-    except Exception as e:
-        raise RuntimeError(f"Error during homology search: {e}")
+    # Homology search
+    homo_res = Parallel(n_jobs=-1)(delayed(find_homology)(trigger, transcripts_list) for trigger in triggers_sequences)
 
     # Extract top homology sequences
-    try:
-        rrf_ranks = extract_top_homology_sequences(homo_res)
-    except Exception as e:
-        raise RuntimeError(f"Error extracting top homology sequences: {e}")
+    rrf_ranks = extract_top_homology_sequences(homo_res)
 
-    # Filter triggers
-    n_switch = SWITCH_BATCH
+    # Top (triggers, homology) -> switch design
+    homology_sequences_final = [ranked_df['sequence'].iloc[-1] for ranked_df in rrf_ranks][:n_switch]
+    print(homology_sequences_final)
+    homology_sequences_final_score = [ranked_df['sequence_RRF'].iloc[-1] for ranked_df in rrf_ranks][:n_switch]
+    print(homology_sequences_final_score)
 
-    homology_sequences = [ranked_df['sequence'].get(0) for ranked_df in rrf_ranks][:n_switch]
-    triggers_seqs = triggers_seqs[:n_switch]
+
+
+    triggers_sequences_final = triggers_sequences[:n_switch]
 
     # Generate switches safely
-    s_switch = time.time()
     switch_res = Parallel(n_jobs=4)(delayed(generate_switch)(f_trigger, f_top_homology_sequence, reporter_gene, cell_type)
-                                    for f_trigger, f_top_homology_sequence in zip(triggers_seqs, homology_sequences))
-    e_switch = time.time()
-    print(f'Switch generation time= {e_switch - s_switch} seconds, for {SWITCH_BATCH} switches')
-    print(results)
-    print(switch_res)
-    results[['switch',  "complex_concentration"]] = pd.DataFrame(switch_res, columns=['switch', "complex_concentration"])
-    print(results)
-    print()
-    regg_results = {'Fold Change Toehold Score': []}
+                                    for f_trigger, f_top_homology_sequence in
+                                    zip(triggers_sequences_final, homology_sequences_final))
+
+    # Model Score
+    regg_results = {'Switch': [], 'Fold Change Toehold Score': []}
     score_calculator = get_score_calc(cell_type)
-    for switch, trigger in zip(list(results['switch']), triggers_seqs):
-        print(switch, trigger)
+    switches = [res_tup[0] for res_tup in switch_res]
+
+    for switch, trigger in zip(switches, triggers_sequences_final):
         score = score_calculator.get_score(switch, trigger)
         regg_results['Fold Change Toehold Score'].append(score)
+        regg_results['Switch'].append(switch)
     regg_results_df = pd.DataFrame(regg_results)
 
-    results['Fold Change Toehold Score'] = regg_results_df['Fold Change Toehold Score']
-    print(results.head(n_switch))
+    # Organize
+    comp_df = pd.DataFrame(homology_sequences_final_score, columns=['Competition Score'])
+    results = pd.concat([triggers_with_mfe_df.head(n_switch), regg_results_df, comp_df], axis=1)
+
+    # RRF calculation- fold change toehold score, competition score, trigger mfe score
+    higher = ["Fold Change Toehold Score"]
+    lower = ["Trigger MFE Score", "Competition Score"]
+    scored_tot = RRF(results, higher, lower, index='Switch').rename(columns={"Switch_RRF": "Combined Score"})
+
     # Prepare and send the report
-    prepare_and_send_report(results.head(n_switch), rrf_ranks, email)
+    final_df = concat_tables(scored_tot, rrf_ranks[:n_switch])
+    send(final_df, email)
     return
 
 def get_score_calc(cell_type):
-
     with open(feature_path, 'r') as file:
         feature_f = file.read()
-
     feature_list = eval(feature_f)
 
     if cell_type == 'E.coli':
@@ -220,16 +227,6 @@ def get_score_calc(cell_type):
     return score_gen
 
 
-
-
-
-
-
-
-
-
-
-
 def RRF(ranking_df, higher_is_better_cols, lower_is_better_cols, index, k=60):
     if not isinstance(higher_is_better_cols, list):
         raise ValueError("'higher_is_better_cols' should be a list")
@@ -241,15 +238,13 @@ def RRF(ranking_df, higher_is_better_cols, lower_is_better_cols, index, k=60):
         raise ValueError("'index' should be a string")
 
     ranking_df = ranking_df.copy().reset_index(drop=True)
+    cols = list(ranking_df.columns)
+
 
     for col in higher_is_better_cols:
-        if col not in ranking_df.columns:
-            raise KeyError(f"Column '{col}' not found in DataFrame")
         ranking_df[col + '_rank'] = ranking_df[col].rank(ascending=False)
 
     for col in lower_is_better_cols:
-        if col not in ranking_df.columns:
-            raise KeyError(f"Column '{col}' not found in DataFrame")
         ranking_df[col + '_rank'] = ranking_df[col].rank(ascending=True)
 
     ranked_columns = higher_is_better_cols + lower_is_better_cols
@@ -258,7 +253,8 @@ def RRF(ranking_df, higher_is_better_cols, lower_is_better_cols, index, k=60):
     ranking_df[f'{index}_RRF'] = ranking_df[ranked_columns].apply(
         lambda row: sum(1 / (k + rank) for rank in row if pd.notna(rank)), axis=1)
 
-    return ranking_df.sort_values(by=f'{index}_RRF', ascending=True)
+    mask = cols + [f'{index}_RRF']
+    return ranking_df[mask].sort_values(by=f'{index}_RRF', ascending=False)
 
 
 def build_homology_map(trigger, seq, gene_name, protein_name):
@@ -332,9 +328,7 @@ def find_homology(sequence, genome_data):
 
     return genes_sub_sequences
 
-
 def generate_switch(trigger, homologous_sequence, reporter_gene, cell_type):
-    print(type(trigger), type(homologous_sequence), type(reporter_gene), type(cell_type))
     # Validate inputs
     if not isinstance(trigger, str) or not trigger:
         logging.error("Invalid trigger sequence provided.")
@@ -361,55 +355,39 @@ def generate_switch(trigger, homologous_sequence, reporter_gene, cell_type):
     return switch_designed_strand, complex_concentration
 
 
-def prepare_and_send_report(df_results, rrf_ranks, email):
-    print(df_results)
-    print(rrf_ranks)
-
+def concat_tables(df_results, rrf_ranks):
     # Validate inputs
-    if not isinstance(df_results, pd.DataFrame):
-        logging.error("df_results must be a pandas DataFrame.")
-        return
-    if not isinstance(rrf_ranks, list) or not all(isinstance(item, pd.DataFrame) for item in rrf_ranks):
-        logging.error("rrf_ranks must be a list of pandas DataFrames.")
-        return
-    if not isinstance(email, str) or "@" not in email:
-        logging.error("Invalid email address provided.")
-        return
-
     rename_dict = {
-        "trigger_window": "Trigger",
-        "switch": "Switch",
-        "sequence": "Competitor Sequence",
-        "mfe_score": "Trigger mfe Score",
-        "sequence_RRF": "Competition Score",
         "distance": "Substitution Distance",
         "idx": "Competitor Location",
         "gene": "Competitor Gene",
-        "protein": "Competitor Protein"
+        'homologous_trigger_mfe': "Competitor Trigger MFE",
+        "protein": "Competitor Protein",
+        'sequence': "Competitor Sequence",
     }
+    print(df_results.to_string())
 
-    try:
-        cols_rearrange = list(rename_dict.values())
-        combined_rows = []
-        rrf_ranks = rrf_ranks.copy()
-
-        for index, row in df_results.iterrows():
-            combined_df = pd.concat([pd.DataFrame([row]), rrf_ranks[index]], ignore_index=True)
-            combined_rows.append(combined_df)
-
-        final_df = pd.concat(combined_rows, ignore_index=True).rename(columns=rename_dict)
-        final_df = final_df[cols_rearrange]
-        print(final_df)
-        # Send the report via the send() function
-        send(final_df, email)
+    combined_rows = []
+    rrf_ranks = rrf_ranks.copy()
+    for index, row in df_results.iterrows():
+        rrf_ranks[index].drop(columns=['sequence_RRF'], inplace=True)
+        rrf_ranks[index]['sequence'].replace(np.nan, f'Not Found', inplace=True)
+        combined_df = pd.concat([pd.DataFrame([row]), rrf_ranks[index]], ignore_index=True)
+        combined_rows.append(combined_df)
+    final_df = pd.concat(combined_rows, ignore_index=True).rename(columns=rename_dict)
 
 
-    except Exception as e:
-        logging.error(f"Error preparing or sending report: {e}")
+    rearnage_cols = ['Trigger', 'Trigger MFE Score', 'Switch', 'Fold Change Toehold Score', 'Competitor Sequence', 'Combined Score',
+                     'Competition Score', 'Competitor Location', 'Substitution Distance', 'Competitor Gene', 'Competitor Protein',
+                     'Competitor Trigger MFE']
+
+    final_df = final_df[rearnage_cols]
+    return final_df
+
 
 
 if __name__ == '__main__':
-    """# Get the arguments from the user form.
+    # Get the arguments from the user form.
     s_mail = sys.argv[1]
     s_target_seq = sys.argv[2]
     s_trigger = sys.argv[3]
@@ -418,13 +396,16 @@ if __name__ == '__main__':
     s_user_trigger_boo = sys.argv[6]
     s_transcripts_list = sys.argv[7]
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
-    """
+
+
     # for development generate inputs
-    s_mail = 'erlichnet57@gmail.com'
-    s_target_seq = "ATGCGTACGTTATGCGTACGTTATGCGTACGTTATGCGTACGTTATGCGTACGTT"
+    """
+    s_mail = ''
+    s_target_seq = "GAAACGCATTAGCACCACCATTACCACCACCATCACCACCACCATCACCATTACCATTACCACAGGTAACGGTGCGGGCTG"
     s_trigger = 'EMPTY'
     s_reporter_gene = "ATGCGTACGTTATGCGTACGTTATGCGTACGTTATGCGTACGTTATGCGTACGTT"
     s_cell_type = 'E.coli'
     s_user_trigger_boo = 'EMPTY'
     s_transcripts_list = 'EMPTY'
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
+    """

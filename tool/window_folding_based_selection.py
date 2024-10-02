@@ -3,7 +3,6 @@ import os
 import re
 import subprocess
 from typing import Dict, Any, List
-
 import pandas as pd
 import requests
 from Bio import SeqIO
