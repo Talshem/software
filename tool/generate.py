@@ -29,18 +29,19 @@ SWITCH_BATCH = 2
 
 model_path = "/workspace/tool/files/webtool_model.txt"
 feature_path = "/workspace/tool/files/model_features.txt"
+
 E_COLI_DATA_PATH = "Escherichia_coli_ASM886v2.pkl"
 HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
 YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
 
 
-#for development
+# for development
 # model_path = "/Users/netanelerlich/Desktop/IGEM/webtool_model.txt"
 # feature_path = "/Users/netanelerlich/Desktop/IGEM/model_features.txt"
 # E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
 # HUMAN_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Homo_sapiens_GRCh38.pkl"
 # YEAST_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Saccharomyces_cerevisiae_S288C.pkl"
-#
+
 
 DATA_PATHS = {
     "E.coli": E_COLI_DATA_PATH,
@@ -101,8 +102,6 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
         raise ValueError("Invalid email provided")
 
 
-
-    results = pd.DataFrame()
     blob_name = DATA_PATHS.get(cell_type)
     blob = bucket.blob(blob_name)
     bytes_data = blob.download_as_bytes()
@@ -345,7 +344,6 @@ def generate_switch(trigger, homologous_sequence, reporter_gene, cell_type):
 
 
 def concat_tables(df_results, rrf_ranks):
-
     # Validate inputs
     combined_rows = []
     rrf_ranks = rrf_ranks.copy()
@@ -353,20 +351,29 @@ def concat_tables(df_results, rrf_ranks):
         df_results['Competition Score'] = 'Competitor Not Found'
         return df_results
 
-    print(df_results.to_string())
+
     for index, row in df_results.iterrows():
         combined_df = pd.concat([pd.DataFrame([row]), rrf_ranks[index]], axis=1, ignore_index=True)
         combined_rows.append(combined_df)
 
-    final_df = pd.concat(combined_rows, ignore_index=True)
-    rearrange_cols = ['Trigger', 'Trigger MFE Score', 'Switch', 'Fold Change Toehold Score', 'Competition Score',
-                      'Combined Score',
-                      'Substitution Distance', 'Competitor Location', 'Competitor Sequence', 'Competitor Gene',
-                      'Competitor Protein',
-                      'Competitor Trigger MFE']
+    final_df = pd.concat(combined_rows, ignore_index=True).drop(columns=[12])
+    rename_dict = {
+        0: 'Trigger',
+        1: 'Trigger MFE Score',
+        2: 'Switch',
+        3: 'Fold Change Toehold Score',
+        4: 'Competition Score',
+        5: 'Combined Score',
+        6: 'Substitution Distance',
+        7: 'Competitor Location',
+        8: 'Competitor Sequence',
+        9: 'Competitor Gene',
+        10: 'Competitor Protein',
+        11: 'Competitor Trigger MFE'
+    }
 
     # Rearrange the columns
-    final_df = final_df[rearrange_cols]
+    final_df = final_df.rename(columns=rename_dict)
     return final_df
 
 
@@ -393,7 +400,7 @@ if __name__ == '__main__':
     s_transcripts_list = 'EMPTY'
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
     """
-    """"
-    with open(YEAST_DATA_PATH,'rb') as f:
-        cell_type_transcripts = pickle.load(f)
-    print(cell_type_transcripts[0])"""
+
+    # with open(YEAST_DATA_PATH,'rb') as f:
+    #     cell_type_transcripts = pickle.load(f)
+    # print(cell_type_transcripts[0])
