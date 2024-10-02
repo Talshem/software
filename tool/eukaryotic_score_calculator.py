@@ -15,8 +15,8 @@ sys.path.insert(1, '/workspace/PyFeat-master/Codes')
 import generateFeatures
 config.threads = 4
 
-# RNACOFOLD_BINARY_NAME = '/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAcofold'
-# RNAUP_BINARY_NAME = "/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAup"
+#RNACOFOLD_BINARY_NAME = '/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAcofold'
+#RNAUP_BINARY_NAME = "/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAup"
 
 RNAUP_BINARY_NAME = "/workspace/miniconda3/envs/myenv/bin/RNAup"
 RNACOFOLD_BINARY_NAME = '/workspace/miniconda3/envs/myenv/bin/RNAcofold'
