@@ -28,8 +28,10 @@ client = storage.Client()
 bucket_name = 'protech_bucket'
 bucket = client.get_bucket(bucket_name)
 
+
 GFP_GENE = "ATGCGTAAAGGAGAAGAACTTTTCACTGGAGTTGTCCCAATTCTTGTTGAATTAGATGGTGATGTTAATGGGCACAAATTTTCTGTCAGTGGAGAGGGTGAAGGTGATGCAACATACGGAAAACTTACCCTTAAATTTATTTGCACTACTGGAAAACTACCTGTTCCGTGGCCAACACTTGTCACTACTTTCGGTTATGGTGTTCAATGCTTTGCGAGATACCCAGATCACATGAAACAGCATGACTTTTTCAAGAGTGCCATGCCCGAAGGTTACGTACAGGAAAGAACTATATTTTTCAAAGATGACGGGAACTACAAGACACGTGCTGAAGTCAAGTTTGAAGGTGATACCCTTGTTAATAGAATCGAGTTAAAAGGTATTGATTTTAAAGAAGATGGAAACATTCTTGGACACAAATTGGAATACAACTATAACTCACACAATGTATACATCATGGCAGACAAACAAAAGAATGGAATCAAAGTTAACTTCAAAATTAGACACAACATTGAAGATGGAAGCGTTCAACTAGCAGACCATTATCAACAAAATACTCCGATTGGCGATGGCCCTGTCCTTTTACCAGACAACCATTACCTGTCCACACAATCTGCCCTTTCGAAAGATCCCAACGAAAAGAGAGACCACATGGTCCTTCTTGAGTTTGTAACCGCTGCTGGGATTACACATGGCATGGATGAACTATACAAA".replace('T', 'U')
 M_CHERRY_ORF = "AUGGUGAGCAAGGGCGAGGAGGACAACAUGGCCAUCAUCAAGGAGUUCAUGCGGUUCAAGGUGCACAUGGAGGGCAGCGUGAACGGCCACGAGUUCGAGAUCGAGGGCGAGGGCGAGGGCCGGCCCUACGAGGGCACCCAGACCGCCAAGCUGAAGGUGACCAAGGGCGGCCCCCUGCCCUUCGCCUGGGACAUCCUGAGCCCCCAGUUCAUGUACGGCAGCAAGGCCUACGUGAAGCACCCCGCCGACAUCCCCGACUACCUGAAGCUGAGCUUCCCCGAGGGCUUCAAGUGGGAGCGGGUGAUGAACUUCGAGGACGGCGGCGUGGUGACCGUGACCCAGGACAGCAGCCUGCAGGACGGCGAGUUCAUCUACAAGGUGAAGCUGCGGGGCACCAACUUCCCCAGCGACGGCCCCGUGAUGCAGAAGAAGACCAUGGGCUGGGAGGCCAGCAGCGAGCGGAUGUACCCCGAGGACGGCGCCCUGAAGGGCGAGAUCAAGCAGCGGCUGAAGCUGAAGGACGGCGGCCACUACGACGCCGAGGUGAAGACCACCUACAAGGCCAAGAAGCCCGUGCAGCUGCCCGGCGCCUACAACGUGAACAUCAAGCUGGACAUCACCAGCCACAACGAGGACUACACCAUCGUGGAGCAGUACGAGCGGGCCGAGGGCCGGCACAGCACCGGCGGCAUGGACGAGCUGUACAAGAGCGGCAACUGA"
+
 
 def process_file_stream(file_stream, file_format):
     parse_inputs_dict = {
@@ -74,13 +76,13 @@ def validate_sequence(sequence):
     if not re.search(r"^[ACGUTactgu]", sequence):
         raise ValueError("Invalid sequence: must contain only A, C, G, or T, U , a ,c,t,g,u nucleotides.")
     return sequence
-
 def validate_sequence_bool(sequence):
     return bool(re.fullmatch(r"[ACGUTacgut]+", sequence))
 
 
 def validate_trigger_length(form, field):
     organism_type = form.cell_type.data
+
     if not form.user_trigger_bool.data:
         return True
 
@@ -89,22 +91,33 @@ def validate_trigger_length(form, field):
     if not validate_sequence_bool(field.data):
         raise ValidationError("Invalid sequence.")
 
+
     trigger_len = len(field.data)
     trigger_bool = form.user_trigger_bool.data
     if trigger_bool:
-        if organism_type == 'E.coli' and trigger_len != 23:
-            raise ValidationError("Trigger must be 23 nucleotides long for prokaryotes.")
-        elif organism_type in ['Saccharomyces cerevisiae', 'Homo sapiens'] and trigger_len != 30:
-            raise ValidationError("Trigger must be 30 nucleotides long for eukaryotes or humans.")
+        if organism_type == 'E.coli' and trigger_len != 30:
+            raise ValidationError("Trigger must be 30 nucleotides long for prokaryotes.")
+
+        elif organism_type in ['Saccharomyces cerevisiae', 'Homo sapiens'] and trigger_len != 23:
+            raise ValidationError("Trigger must be 23 nucleotides long for eukaryotes or humans.")
     return True
 
-def validate_sequence(form, field):
+
+def validate_sequence_input(form, field):
     if form.user_trigger_bool.data:
         return True
+
     if not field.data:
         raise ValidationError("Sequence is required.")
-    if not validate_sequence_bool(field.data):
-        raise ValidationError("Invalid sequence.")
+    else:
+        if not validate_sequence_bool(field.data):
+            raise ValidationError("Invalid sequence.")
+
+        if len(field.data) < 100:
+            return ValidationError('sequence length must be above 100 nucleotides')
+        else:
+            return True
+
     return True
 
 def validate_reporter(form, field):
@@ -114,12 +127,14 @@ def validate_reporter(form, field):
         else:
             return True
     else:
+        if not validate_sequence_bool(field.data):
+            raise ValidationError("Invalid sequence.")
+
         if form.optional_reporter.data != 'None':
             raise ValidationError("Sequence is required or choose from optional reporters, can't input both.")
         else:
             return True
-    if not validate_sequence_bool(field.data):
-        raise ValidationError("Invalid sequence.")
+
     return True
 
 def validate_file_format(form, filed):
@@ -136,7 +151,7 @@ def validate_file_format(form, filed):
 
 class InputForm(FlaskForm):
     email = StringField("Email", [DataRequired()], render_kw={"id": "email"})
-    target_seq = StringField("RNA sequence", render_kw={"id": "gene"}, validators=[validate_sequence])
+    target_seq = StringField("RNA sequence", render_kw={"id": "gene"}, validators=[validate_sequence_input])
     cell_type = SelectField("Organism", choices=[('E.coli', 'E.coli'), ("Saccharomyces cerevisiae", 'Saccharomyces cerevisiae'),
                                      ('Homo sapiens', 'Homo sapiens')], render_kw={"id": "cell_type"})
     optional_reporter = SelectField("Optional Reporters",
@@ -191,12 +206,13 @@ def user_data_getter():
             reporter_gene = input_form.reporter_gene.data.upper()
             reporter_option = input_form.optional_reporter.data
             if reporter_option != 'None':
-                reporter_gene = reporter_option
-            else:
                 if reporter_gene == 'GFP':
                     reporter_gene = GFP_GENE
                 else:
                     reporter_gene = M_CHERRY_ORF
+
+            else:
+                reporter_gene = reporter_gene.upper()
 
             cell_type = input_form.cell_type.data
             user_trigger_bool = input_form.user_trigger_bool.data
@@ -222,7 +238,7 @@ def user_data_getter():
             else:
                 s_file_dict = "EMPTY"
 
-
+################################################################################################################################
             subprocess.run(['python', 'tool/generate.py', s_email, s_target_seq, s_trigger, s_reporter_gene, s_cell_type,
                             s_user_trigger_bool, s_file_dict],
                            text=True)
