@@ -49,14 +49,8 @@ def validate_sequence(sequence):
         raise ValueError("Invalid sequence: must contain only A, C, G, or T, U , a ,c,t,g,u nucleotides.")
     return sequence
 
-
-
 def validate_sequence_bool(sequence):
     return bool(re.fullmatch(r"[ACGUTacgut]+", sequence))
-
-
-
-
 
 def dict_to_fasta(genes_list, output_file):
     # Create a list of SeqRecord objects

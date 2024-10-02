@@ -66,7 +66,6 @@ def process_file_stream(file_stream, file_format):
         try:
             seq_record['sequence'] = validate_sequence(str(record.seq))
         except ValueError as e:
-             # TODO: send mail to user noteing the error?
              raise ValueError(f"Error in processing file: {e}")
         seq_record['protein'] = ''
         genes_list.append(seq_record)
@@ -238,7 +237,7 @@ def user_data_getter():
             else:
                 s_file_dict = "EMPTY"
 
-################################################################################################################################
+
             subprocess.run(['python', 'tool/generate.py', s_email, s_target_seq, s_trigger, s_reporter_gene, s_cell_type,
                             s_user_trigger_bool, s_file_dict],
                            text=True)
