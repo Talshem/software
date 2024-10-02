@@ -345,21 +345,10 @@ def generate_switch(trigger, homologous_sequence, reporter_gene, cell_type):
 
 
 def concat_tables(df_results, rrf_ranks):
-    # Validate inputs
-    rename_dict = {
-        "distance": "Substitution Distance",
-        "idx": "Competitor Location",
-        "gene": "Competitor Gene",
-        'homologous_trigger_mfe': "Competitor Trigger MFE",
-        "protein": "Competitor Protein",
-        'sequence': "Competitor Sequence",
-    }
 
+    # Validate inputs
     combined_rows = []
     rrf_ranks = rrf_ranks.copy()
-    #print(rrf_ranks[0])
-    #print(df_results.to_string())
-    print(rrf_ranks)
     if all([len(rrf_df) == 0 for rrf_df in rrf_ranks]):
         df_results['Competition Score'] = 'Competitor Not Found'
         return df_results
@@ -369,22 +358,21 @@ def concat_tables(df_results, rrf_ranks):
         combined_df = pd.concat([pd.DataFrame([row]), rrf_ranks[index]], axis=1, ignore_index=True)
         combined_rows.append(combined_df)
 
+    final_df = pd.concat(combined_rows, ignore_index=True)
+    rearrange_cols = ['Trigger', 'Trigger MFE Score', 'Switch', 'Fold Change Toehold Score', 'Competition Score',
+                      'Combined Score',
+                      'Substitution Distance', 'Competitor Location', 'Competitor Sequence', 'Competitor Gene',
+                      'Competitor Protein',
+                      'Competitor Trigger MFE']
 
-    final_df = pd.concat(combined_rows, ignore_index=True).rename(columns=rename_dict)
-    """       rearnage_cols = ['Trigger', 'Trigger MFE Score', 'Switch', 'Fold Change Toehold Score', 'Competitor Sequence', 'Combined Score',
-                     'Competition Score', 'Competitor Location', 'Substitution Distance', 'Competitor Gene', 'Competitor Protein',
-                     'Competitor Trigger MFE']
-    """
-
-    # final_df = final_df[rearnage_cols]
-
+    # Rearrange the columns
+    final_df = final_df[rearrange_cols]
     return final_df
 
 
 
 if __name__ == '__main__':
     # Get the arguments from the user form.
-
     s_mail = sys.argv[1]
     s_target_seq = sys.argv[2]
     s_trigger = sys.argv[3]
@@ -394,7 +382,6 @@ if __name__ == '__main__':
     s_transcripts_list = sys.argv[7]
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
     # for development generate inputs
-
 
     """
     s_mail = 'erlichnet57@gmail.com'
