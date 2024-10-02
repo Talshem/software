@@ -3,11 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Guide</title>
+    <title>ToREC - User Guide</title>
+    <!-- Include Bootstrap CSS for consistent navbar styling -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            background: repeating-linear-gradient(
+                135deg,
+                #ffffff 0px,
+                #ffffff 5px,
+                #efefef 5px,
+                #efefef 10px
+            );
+            font-family: sans-serif;
             line-height: 1.6;
+            padding: 20px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
         h1, h2, h3 {
             color: #333;
@@ -33,101 +46,142 @@
             font-size: 0.9em;
             color: #555;
         }
+        .custom-navbar {
+            height: 80px; /* Increase the navbar height */
+            font-size: 1.2em; /* Increase the font size */
+        }
+        .custom-navbar .navbar-brand {
+            font-size: 1.5em; /* Increase the brand font size */
+        }
+        .custom-navbar .nav-link {
+            font-size: 1.2em; /* Increase the nav-link font size */
+        }
     </style>
 </head>
 <body>
 
-    {% include 'navbar.html' %} <!-- Include the navbar.html template -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('user_data_getter') }}">Generate</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('guide') }}">User Guide</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://2024.igem.wiki/tau-israel/software">Documentation</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://pypi.org/project/toegen/">PyPi Package</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
     <div class="container">
         <div class="logo-container" style="margin-top: 20px;">
-            <img src="im/logo_torec.png" alt="ToREC Logo" class="logo" width="500" height="220">
+            <img src="{{ url_for('static', filename='im/logo_torec.png') }}" alt="ToREC Logo" class="logo" width="500" height="220">
         </div>
 
-    <h1>User Guide: Input Form for RNA Sequence Analysis</h1>
+        <h1>
+            User Guide: Input Form for RNA Sequence Analysis</h1>
 
-    <h2>Step 1: Enter Your Email Address</h2>
-    <p>
-        In the first field, you should enter your email address. This is important so that results can be sent to you after the form is processed.
-    </p>
-    <div class="image-placeholder">
-        <img src="path_to_image/email_input.png" alt="Email Input Image">
+        <h2>Step 1: Enter Your Email Address</h2>
+        <p>
+            In the first field, you should enter your email address. This is important so that results can be sent to you after the form is processed.
+        </p>
+        <div class="image-placeholder">
+            <img src="path_to_image/email_input.png" alt="Email Input Image">
+        </div>
+
+        <h2>Step 2: Provide the Target RNA Sequence</h2>
+        <p>
+            Enter the RNA sequence you wish to analyze. The sequence should only contain valid nucleotide characters, which include A, C, G, U (uppercase), and their lowercase equivalents (a, c, g, u).
+        </p>
+        <p class="note">
+            Note: If you enter characters outside of these (e.g., numbers or special symbols), the form will return an error indicating the sequence is invalid.
+        </p>
+        <div class="image-placeholder">
+            <img src="path_to_image/rna_sequence_input.png" alt="RNA Sequence Input Image">
+        </div>
+
+        <h2>Step 3: Select the Organism Type</h2>
+        <p>
+            Choose the organism type from the dropdown list. Options include *E.coli* (prokaryote), *Saccharomyces cerevisiae* (yeast), and *Homo sapiens* (human).
+        </p>
+        <div class="image-placeholder">
+            <img src="path_to_image/organism_selection.png" alt="Organism Selection Image">
+        </div>
+
+        <h2>Step 4: Choose an Optional Reporter Gene</h2>
+        <p>
+            If you wish to include an optional reporter gene, select one from the dropdown menu. The available options are 'None' (if no reporter gene is needed), 'GFP' (Green Fluorescent Protein), or 'mCherry' (a red fluorescent protein).
+        </p>
+        <p class="note">
+            Note: If you provide a reporter gene sequence manually, you cannot select one from this list, and vice versa. You can only choose one option.
+        </p>
+        <div class="image-placeholder">
+            <img src="path_to_image/reporter_selection.png" alt="Reporter Gene Selection Image">
+        </div>
+
+        <h2>Step 5: Specify if You Have a Known Trigger Sequence</h2>
+        <p>
+            Indicate whether you have a known trigger sequence. If so, check the box labeled "Got a known trigger?" and enter the trigger sequence in the provided input field. Make sure the sequence length matches the organism type you selected:
+        </p>
+        <ul>
+            <li>For E.coli, the trigger must be exactly 23 nucleotides long.</li>
+            <li>For Saccharomyces cerevisiae or Homo sapiens, the trigger must be 30 nucleotides long.</li>
+        </ul>
+        <p class="note">
+            Note: If you provide a trigger sequence that does not match the required length, you will receive an error message.
+        </p>
+        <div class="image-placeholder">
+            <img src="im/trigger.png" alt="Trigger Sequence Input Image">
+        </div>
+
+        <h2>Step 6: Enter the Reporter Gene Sequence</h2>
+        <p>
+            If you did not select a reporter from the dropdown menu, you can provide a custom reporter gene sequence here. Ensure the sequence contains valid nucleotide characters.
+        </p>
+        <p class="note">
+            Note: You cannot input both a reporter gene sequence and select an optional reporter at the same time. You must choose one or the other.
+        </p>
+        <div class="image-placeholder">
+            <img src="path_to_image/reporter_gene_input.png" alt="Reporter Gene Input Image">
+        </div>
+
+        <h2>Step 7: Upload Your Transcript File</h2>
+        <p>
+            Upload the file containing your transcript sequences. The accepted file formats include: .fasta, .fa, .fastq, .gb, .gbk, .embl, .phy, .phylip, .aln, .nex, .stockholm, .tab, .qual, .abi, .sff, .xml, or .ig.
+        </p>
+        <p class="note">
+            Note: If you upload a file in an unsupported format, the form will return an error indicating the file format is invalid.
+        </p>
+        <div class="image-placeholder">
+            <img src="path_to_image/file_upload_input.png" alt="File Upload Input Image">
+        </div>
+
+        <h2>Step 8: Submit the Form</h2>
+        <p>
+            Once all the required fields are completed, click the "Submit" button to submit the form for processing. You will receive the results via email based on the input you provided.
+        </p>
+        <div class="image-placeholder">
+            <img src="path_to_image/form_submission.png" alt="Form Submission Image">
+        </div>
+
     </div>
 
-    <h2>Step 2: Provide the Target RNA Sequence</h2>
-    <p>
-        Enter the RNA sequence you wish to analyze. The sequence should only contain valid nucleotide characters, which include A, C, G, U (uppercase), and their lowercase equivalents (a, c, g, u).
-    </p>
-    <p class="note">
-        Note: If you enter characters outside of these (e.g., numbers or special symbols), the form will return an error indicating the sequence is invalid.
-    </p>
-    <div class="image-placeholder">
-        <img src="path_to_image/rna_sequence_input.png" alt="RNA Sequence Input Image">
-    </div>
-
-    <h2>Step 3: Select the Organism Type</h2>
-    <p>
-        Choose the organism type from the dropdown list. Options include *E.coli* (prokaryote), *Saccharomyces cerevisiae* (yeast), and *Homo sapiens* (human).
-    </p>
-    <div class="image-placeholder">
-        <img src="path_to_image/organism_selection.png" alt="Organism Selection Image">
-    </div>
-
-    <h2>Step 4: Choose an Optional Reporter Gene</h2>
-    <p>
-        If you wish to include an optional reporter gene, select one from the dropdown menu. The available options are 'None' (if no reporter gene is needed), 'GFP' (Green Fluorescent Protein), or 'mCherry' (a red fluorescent protein).
-    </p>
-    <p class="note">
-        Note: If you provide a reporter gene sequence manually, you cannot select one from this list, and vice versa. You can only choose one option.
-    </p>
-    <div class="image-placeholder">
-        <img src="path_to_image/reporter_selection.png" alt="Reporter Gene Selection Image">
-    </div>
-
-    <h2>Step 5: Specify if You Have a Known Trigger Sequence</h2>
-    <p>
-        Indicate whether you have a known trigger sequence. If so, check the box labeled "Got a known trigger?" and enter the trigger sequence in the provided input field. Make sure the sequence length matches the organism type you selected:
-    </p>
-    <ul>
-        <li>For E.coli, the trigger must be exactly 23 nucleotides long.</li>
-        <li>For Saccharomyces cerevisiae or Homo sapiens, the trigger must be 30 nucleotides long.</li>
-    </ul>
-    <p class="note">
-        Note: If you provide a trigger sequence that does not match the required length, you will receive an error message.
-    </p>
-    <div class="image-placeholder">
-        <img src="im/trigger.png" alt=Trigger Sequence Input Image">
-    </div>
-
-    <h2>Step 6: Enter the Reporter Gene Sequence</h2>
-    <p>
-        If you did not select a reporter from the dropdown menu, you can provide a custom reporter gene sequence here. Ensure the sequence contains valid nucleotide characters.
-    </p>
-    <p class="note">
-        Note: You cannot input both a reporter gene sequence and select an optional reporter at the same time. You must choose one or the other.
-    </p>
-    <div class="image-placeholder">
-        <img src="path_to_image/reporter_gene_input.png" alt="Reporter Gene Input Image">
-    </div>
-
-    <h2>Step 7: Upload Your Transcript File</h2>
-    <p>
-        Upload the file containing your transcript sequences. The accepted file formats include: .fasta, .fa, .fastq, .gb, .gbk, .embl, .phy, .phylip, .aln, .nex, .stockholm, .tab, .qual, .abi, .sff, .xml, or .ig.
-    </p>
-    <p class="note">
-        Note: If you upload a file in an unsupported format, the form will return an error indicating the file format is invalid.
-    </p>
-    <div class="image-placeholder">
-        <img src="path_to_image/file_upload_input.png" alt="File Upload Input Image">
-    </div>
-
-    <h2>Step 8: Submit the Form</h2>
-    <p>
-        Once all the required fields are completed, click the "Submit" button to submit the form for processing. You will receive the results via email based on the input you provided.
-    </p>
-    <div class="image-placeholder">
-        <img src="path_to_image/form_submission.png" alt="Form Submission Image">
-    </div>
+    <!-- Include Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
 </html>

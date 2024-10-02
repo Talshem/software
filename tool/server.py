@@ -23,6 +23,7 @@ app.config['SECRET_KEY'] = 'shaniqua'
 app.config['MAX_CONTENT_LENGTH'] = 210 * 1024 * 1024  # 210 MB
 app.config['UPLOAD_EXTENSIONS'] = ['.fasta']
 
+
 client = storage.Client()
 bucket_name = 'protech_bucket'
 bucket = client.get_bucket(bucket_name)
@@ -237,7 +238,6 @@ def user_data_getter():
             flash('Form submitted successfully. Job accepted.')
         except Exception as e:
             flash(f"Error processing form: {e}")
-
 
     return render_template('form.html', input_form=input_form)
 

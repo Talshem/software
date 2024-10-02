@@ -26,15 +26,22 @@ EDIT_DIST = 7
 TRIGGERS_BATCH = 15
 SWITCH_BATCH = 2
 
-E_COLI_DATA_PATH = "Escherichia_coli_ASM886v2.pkl"
-HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
-YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
 
 model_path = "/workspace/tool/files/webtool_model.txt"
 feature_path = "/workspace/tool/files/model_features.txt"
 
+E_COLI_DATA_PATH = "Escherichia_coli_ASM886v2.pkl"
+HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
+YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
+
+
+# for development
 #model_path = "/Users/netanelerlich/Desktop/IGEM/webtool_model.txt"
 #feature_path = "/Users/netanelerlich/Desktop/IGEM/model_features.txt"
+#E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
+#HUMAN_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Homo_sapiens_GRCh38.pkl"
+#YEAST_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Saccharomyces_cerevisiae_S288C.pkl"
+
 
 DATA_PATHS = {
     "E.coli": E_COLI_DATA_PATH,
@@ -42,13 +49,6 @@ DATA_PATHS = {
     "Saccharomyces cerevisiae": YEAST_DATA_PATH
 }
 
-"""
-
-# for development
-E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
-HUMAN_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Homo_sapiens_GRCh38.pkl"
-YEAST_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Saccharomyces_cerevisiae_S288C.pkl"
-"""
 
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -134,7 +134,7 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
         triggers_with_mfe_df = (optional_triggers_df.iloc[:n_triggers, :][["window_sequence", "mfe_score"]].
                                 reset_index(drop=True)).rename(columns={"window_sequence": "Trigger",
                                                                         "mfe_score": "Trigger MFE Score"})
-
+    print(triggers_with_mfe_df.to_string())
     # Extract triggers
     triggers_with_mfe = np.array(triggers_with_mfe_df)
     triggers_sequences = triggers_with_mfe[:, 0]
@@ -148,23 +148,21 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     # Top (triggers, homology) -> switch design
     homology_sequences_final = [ranked_df['sequence'].iloc[0] if len(ranked_df) > 0 else None for ranked_df in rrf_ranks][:n_switch]
     homology_sequences_final_score = [ranked_df['sequence_RRF'].iloc[0] if len(ranked_df) > 0 else None for ranked_df in rrf_ranks][:n_switch]
-
     triggers_sequences_final = triggers_sequences[:n_switch]
 
     # Generate switches safely
     switch_res = Parallel(n_jobs=4)(delayed(generate_switch)(f_trigger, f_top_homology_sequence, reporter_gene, cell_type)
                                     for f_trigger, f_top_homology_sequence in
                                     zip(triggers_sequences_final, homology_sequences_final))
-
     # Model Score
     regg_results = {'Switch': [], 'Fold Change Toehold Score': []}
     score_calculator = get_score_calc(cell_type)
     switches = [res_tup[0] for res_tup in switch_res]
 
-    for switch, trigger in zip(switches, triggers_sequences_final):
-        score = score_calculator.get_score(switch, trigger)
+    for switch_model, trigger_model in zip(switches, triggers_sequences_final):
+        score = score_calculator.get_score(switch_model, trigger_model)
         regg_results['Fold Change Toehold Score'].append(score)
-        regg_results['Switch'].append(switch)
+        regg_results['Switch'].append(switch_model)
     regg_results_df = pd.DataFrame(regg_results)
 
     # Organize
@@ -395,9 +393,10 @@ if __name__ == '__main__':
     s_mail = 'erlichnet57@gmail.com'
     s_target_seq = "ATTTTAGGGCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGGGGGTTTTTGTGTGTGTGTGTGTGTTGTGTGTGTTGTGTGTGTGTGT"
     s_trigger = 'EMPTY'
-    s_reporter_gene = "ATGCGTACGTTATGCGTACGTTATGCGTACGTTATGCGTACGTTATGCGTACGTT"
+    s_reporter_gene = "ATGCGTAAAGGAGAAGAACTTTTCACTGGAGTTGTCCCAATTCTTGTTGAATTAGATGGTGATGTTAATGGGCACAAATTTTCTGTCAGTGGAGAGGGTGAAGGTGATGCAACATACGGAAAACTTACCCTTAAATTTATTTGCACTACTGGAAAACTACCTGTTCCGTGGCCAACACTTGTCACTACTTTCGGTTATGGTGTTCAATGCTTTGCGAGATACCCAGATCACATGAAACAGCATGACTTTTTCAAGAGTGCCATGCCCGAAGGTTACGTACAGGAAAGAACTATATTTTTCAAAGATGACGGGAACTACAAGACACGTGCTGAAGTCAAGTTTGAAGGTGATACCCTTGTTAATAGAATCGAGTTAAAAGGTATTGATTTTAAAGAAGATGGAAACATTCTTGGACACAAATTGGAATACAACTATAACTCACACAATGTATACATCATGGCAGACAAACAAAAGAATGGAATCAAAGTTAACTTCAAAATTAGACACAACATTGAAGATGGAAGCGTTCAACTAGCAGACCATTATCAACAAAATACTCCGATTGGCGATGGCCCTGTCCTTTTACCAGACAACCATTACCTGTCCACACAATCTGCCCTTTCGAAAGATCCCAACGAAAAGAGAGACCACATGGTCCTTCTTGAGTTTGTAACCGCTGCTGGGATTACACATGGCATGGATGAACTATACAAA".replace('T', 'U')
     s_cell_type = 'E.coli'
     s_user_trigger_boo = 'EMPTY'
     s_transcripts_list = 'EMPTY'
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
     """
+
