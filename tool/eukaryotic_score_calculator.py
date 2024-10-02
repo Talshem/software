@@ -88,8 +88,7 @@ class EukaryoticScoreCalculator:
         self.model = lightgbm.Booster(model_file=model_file)
 
     def get_score(self, switch, trigger) -> float:
-        print(switch)
-        print(trigger)
+
         features_df = pd.DataFrame()
 
         #RNAfold
