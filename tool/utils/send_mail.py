@@ -24,9 +24,9 @@ def send_email_with_attachment(results_df, to_email):
 
     Please find attached the detailed report in Excel format, which contains the results of your toehold switch design and analysis based on free energy calculations and competition modeling. We hope this data provides valuable insights for your project.
 
-    If you have any questions or need further assistance, feel free to reach out to our support team.
+    If you have any questions or need further assistance, feel free to reach out.
 
-    Thank you for using the ProTech WebTool, and we look forward to assisting you in future analyses.
+    Thank you for using the WebTool, and we look forward to assisting you in future analyses.
 
     Best regards,
     The ProTech Team
