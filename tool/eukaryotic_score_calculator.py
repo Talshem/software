@@ -10,7 +10,7 @@ from Bio.SeqUtils import gc_fraction
 from RNA import RNA
 from nupack import *
 
-#sys.path.insert(1, '/Users/netanelerlich/Downloads/PyFeat-master/Codes')
+# sys.path.insert(1, '/Users/netanelerlich/Downloads/PyFeat-master/Codes')
 sys.path.insert(1, '/workspace/PyFeat-master/Codes')
 import generateFeatures
 config.threads = 4
