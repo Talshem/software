@@ -29,7 +29,6 @@ SWITCH_BATCH = 2
 
 model_path = "/workspace/tool/files/webtool_model.txt"
 feature_path = "/workspace/tool/files/model_features.txt"
-
 E_COLI_DATA_PATH = "Escherichia_coli_ASM886v2.pkl"
 HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
 YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
@@ -101,6 +100,8 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     # Basic input validation
     if not isinstance(email, str) or "@" not in email:
         raise ValueError("Invalid email provided")
+    #print(email,target_seq,trigger,reporter_gene,cell_type,user_trigger_boo,transcripts_list)
+
 
     results = pd.DataFrame()
     blob_name = DATA_PATHS.get(cell_type)
@@ -109,10 +110,10 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     file_like_obj = io.BytesIO(bytes_data)
     cell_type_transcripts = pickle.load(file_like_obj)
 
-    """"
-    with open(blob_name,'rb') as f:
-        cell_type_transcripts = pickle.load(f)
-    """
+
+    # with open(blob_name, 'rb') as f:
+    #     cell_type_transcripts = pickle.load(f)
+
 
     # Update transcripts_list
     if transcripts_list != 'EMPTY':
@@ -134,7 +135,7 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
         triggers_with_mfe_df = (optional_triggers_df.iloc[:n_triggers, :][["window_sequence", "mfe_score"]].
                                 reset_index(drop=True)).rename(columns={"window_sequence": "Trigger",
                                                                         "mfe_score": "Trigger MFE Score"})
-    print(triggers_with_mfe_df.to_string())
+
     # Extract triggers
     triggers_with_mfe = np.array(triggers_with_mfe_df)
     triggers_sequences = triggers_with_mfe[:, 0]
@@ -176,6 +177,7 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
 
     # Prepare and send the report
     final_df = concat_tables(scored_tot, rrf_ranks[:n_switch])
+    print(final_df.to_string())
     send(final_df, email)
     return
 
@@ -353,24 +355,29 @@ def concat_tables(df_results, rrf_ranks):
         "protein": "Competitor Protein",
         'sequence': "Competitor Sequence",
     }
-    print(df_results.to_string())
 
     combined_rows = []
     rrf_ranks = rrf_ranks.copy()
-    for index, row in df_results.iterrows():
-        rrf_ranks[index].drop(columns=['sequence_RRF'], inplace=True)
-        rrf_ranks[index]['sequence'].replace(np.nan, f'Not Found', inplace=True)
-        combined_df = pd.concat([pd.DataFrame([row]), rrf_ranks[index]], ignore_index=True)
-        combined_rows.append(combined_df)
-    final_df = pd.concat(combined_rows, ignore_index=True).rename(columns=rename_dict)
+    #print(rrf_ranks[0])
+    #print(df_results.to_string())
 
+    if all([len(rrf_df) == 0 for rrf_df in rrf_ranks]):
+        df_results['Competition Score'] = 'Competitor Not Found'
+        return df_results
+
+    for index, row in df_results.iterrows():
+        rrf_ranks[index].rename(columns={'sequence_RRF': 'Competition Score'}, inplace=True)
+        rrf_ranks[index]['sequence'].replace({None: "Competitor Not Found"}, inplace=True)
+        combined_df = pd.concat(pd.DataFrame([row]), rrf_ranks[index], axis=1, ignore_index=True)
+        combined_rows.append(combined_df)
+
+    final_df = pd.concat(combined_rows, ignore_index=True).rename(columns=rename_dict)
 
     rearnage_cols = ['Trigger', 'Trigger MFE Score', 'Switch', 'Fold Change Toehold Score', 'Competitor Sequence', 'Combined Score',
                      'Competition Score', 'Competitor Location', 'Substitution Distance', 'Competitor Gene', 'Competitor Protein',
                      'Competitor Trigger MFE']
 
     final_df = final_df[rearnage_cols]
-    print(final_df.to_string())
     return final_df
 
 
@@ -391,7 +398,7 @@ if __name__ == '__main__':
 
     """
     s_mail = 'erlichnet57@gmail.com'
-    s_target_seq = "ATTTTAGGGCCCCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGGGGGTTTTTGTGTGTGTGTGTGTGTTGTGTGTGTTGTGTGTGTGTGT"
+    s_target_seq = "TAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGAT"
     s_trigger = 'EMPTY'
     s_reporter_gene = "ATGCGTAAAGGAGAAGAACTTTTCACTGGAGTTGTCCCAATTCTTGTTGAATTAGATGGTGATGTTAATGGGCACAAATTTTCTGTCAGTGGAGAGGGTGAAGGTGATGCAACATACGGAAAACTTACCCTTAAATTTATTTGCACTACTGGAAAACTACCTGTTCCGTGGCCAACACTTGTCACTACTTTCGGTTATGGTGTTCAATGCTTTGCGAGATACCCAGATCACATGAAACAGCATGACTTTTTCAAGAGTGCCATGCCCGAAGGTTACGTACAGGAAAGAACTATATTTTTCAAAGATGACGGGAACTACAAGACACGTGCTGAAGTCAAGTTTGAAGGTGATACCCTTGTTAATAGAATCGAGTTAAAAGGTATTGATTTTAAAGAAGATGGAAACATTCTTGGACACAAATTGGAATACAACTATAACTCACACAATGTATACATCATGGCAGACAAACAAAAGAATGGAATCAAAGTTAACTTCAAAATTAGACACAACATTGAAGATGGAAGCGTTCAACTAGCAGACCATTATCAACAAAATACTCCGATTGGCGATGGCCCTGTCCTTTTACCAGACAACCATTACCTGTCCACACAATCTGCCCTTTCGAAAGATCCCAACGAAAAGAGAGACCACATGGTCCTTCTTGAGTTTGTAACCGCTGCTGGGATTACACATGGCATGGATGAACTATACAAA".replace('T', 'U')
     s_cell_type = 'E.coli'
@@ -399,4 +406,5 @@ if __name__ == '__main__':
     s_transcripts_list = 'EMPTY'
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
     """
+    
 
