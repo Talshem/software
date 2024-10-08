@@ -22,8 +22,10 @@ from RNA import RNA
 from nupack import *
 config.threads = 8
 
-EDIT_DIST = 5
-TRIGGERS_BATCH = 20
+
+EDIT_DIST = 7
+TRIGGERS_BATCH = 15
+
 SWITCH_BATCH = 2
 
 
@@ -52,7 +54,11 @@ DATA_PATHS = {
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 def extract_top_homology_sequences(triggers_homology_mapping):
+
     print(triggers_homology_mapping)
+    homo_dfs = []
+
+
     homo_dfs = []
 
     for trigger_homology in triggers_homology_mapping:
@@ -63,15 +69,12 @@ def extract_top_homology_sequences(triggers_homology_mapping):
                     trigger_all_matches.extend(gene_homology.values())
                 else:
                     continue
-
-            # If no matches are found, create an empty DataFrame
             if not trigger_all_matches or not trigger_all_matches[0]:
                 trig_res_df = pd.DataFrame(
                     columns=['distance', 'idx', 'sequence', 'gene', 'protein', 'homologous_trigger_mfe'])
             else:
                 matches_df = pd.DataFrame(trigger_all_matches[0])
 
-                # add competitor only MFE
                 mfe_dict = {'homologous_trigger_mfe': []}
                 for homos in trigger_all_matches[0]:
                     if 'sequence' in homos.keys():
@@ -81,7 +84,6 @@ def extract_top_homology_sequences(triggers_homology_mapping):
                     else:
                         mfe_dict['homologous_trigger_mfe'].append(None)
                 mfe_df = pd.DataFrame(mfe_dict)
-
                 trig_res_df = pd.concat([matches_df, mfe_df], axis=1)
         else:
             trig_res_df = pd.DataFrame(
@@ -89,8 +91,6 @@ def extract_top_homology_sequences(triggers_homology_mapping):
             )
 
         homo_dfs.append(trig_res_df)
-
-
     # Competition RRF calculation with valid checks
     higher = ['homologous_trigger_mfe']
     lower = ['distance']
@@ -125,6 +125,7 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
         transcripts_list = cell_type_transcripts
 
     # Get optional triggers
+
     triggers_with_mfe_df = pd.DataFrame([trigger, None]).T.rename(columns={0: "Trigger", 1: "Trigger MFE Score"})
     n_switch = 1
     if user_trigger_boo == 'EMPTY':
@@ -236,6 +237,7 @@ def RRF(ranking_df, higher_is_better_cols, lower_is_better_cols, index, k=60):
         raise ValueError("'index' should be a string")
 
     ranking_df = ranking_df.copy().reset_index()
+
     cols = list(ranking_df.columns)
 
 
@@ -266,6 +268,7 @@ def build_homology_map(trigger, seq, gene_name, protein_name):
         return []
 
     sequence_match_mapping = []
+
     try:
         # Find matches with error handling
         matches = find_near_matches(trigger, seq, max_insertions=0, max_deletions=0, max_l_dist=EDIT_DIST)
@@ -298,6 +301,7 @@ def find_homology(sequence, genome_data):
 
     genes_sub_sequences = []
     for gene_data_dict in genome_data:
+
         gene_sub_seqs = {}
         mRNA_seq = gene_data_dict.get('sequence', "")
         gene_name = gene_data_dict.get('gene', "")
@@ -348,7 +352,6 @@ def concat_tables(df_results, rrf_ranks):
     if all([len(rrf_df) == 0 for rrf_df in rrf_ranks]):
         df_results['Competition Score'] = 'Competitor Not Found'
         return df_results
-
 
     for i, row in df_results.iterrows():
         if 'index' in row:

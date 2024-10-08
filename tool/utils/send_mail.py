@@ -48,7 +48,11 @@ def send_email_with_attachment(results_df, to_email):
     part = MIMEBase('application', 'octet-stream')
     part.set_payload(excel_buffer.read())
     encoders.encode_base64(part)
+
     part.add_header('Content-Disposition', 'attachment', filename='ToREC report.xlsx')
+
+    part.add_header('Content-Disposition', 'attachment', filename='results.xlsx')
+
     msg.attach(part)
 
     # Send the email

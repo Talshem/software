@@ -88,7 +88,6 @@ def remove_single_spaces(sequence):
     else:
         return sequence
 
-
 def validate_trigger_length(form, field):
     organism_type = form.cell_type.data
 
@@ -217,6 +216,7 @@ def user_data_getter():
 
             reporter_gene = input_form.reporter_gene.data.upper()
             reporter_gene = remove_single_spaces(reporter_gene)
+
             reporter_option = input_form.optional_reporter.data
             if reporter_option != 'None':
                 if reporter_gene == 'GFP':
@@ -262,6 +262,7 @@ def user_data_getter():
             input_form.user_trigger_bool.data = ''
             input_form.cell_type.data = ''
             input_form.file.data = ''
+
             flash('Thank you for using ToREC! Form submitted successfully!')
         except Exception as e:
             flash(f"Error processing form: {e}")
