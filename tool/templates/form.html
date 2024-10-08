@@ -29,6 +29,12 @@
         .file-drop-area.is-active {
             background-color: rgba(125, 123, 125, 0.05);
         }
+        .container {
+            margin:50px;
+            background-color: #fffaf3;
+            border-radius: 15px;
+            border: 5px solid white
+        }
         .file-drop-area input[type="file"] {
             position: absolute;
             width: 100%;
@@ -112,15 +118,22 @@
             text-align: center;
             margin-top: 20px;
         }
-
         form {
             text-align: left;
             margin-left: 30px;
         }
-
         .submit-button-container {
-            text-align: center; /* Centers the button */
-            margin-top: 20px;   /* Adds space above the button */
+            text-align: center;
+            margin-top: 50px;
+            margin-bottom: 120px;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        .submit-button-container .btn {
+            padding: 15px 25px; /* Increase padding for a bigger button */
+            font-size: 1.5rem;  /* Increase the font size */
+            width: 70%;        /* Make the button full-width (optional) */
+            max-width: 180px;   /* Set a maximum width if full-width isn't desired */
         }
 
         body {
@@ -140,7 +153,6 @@
         .form-group {
             padding-left: 10px;
         }
-
 
 
     </style>
@@ -252,6 +264,19 @@
         .form-group.disabled {
             display: none;
         }
+        .fill-example-btn {
+        background-color: #b3d7ff; /* Lighter shade of blue */
+        border-color: #b3d7ff;
+        color: #000;
+        }
+        .fill-example-btn:hover {
+        background-color: #99ccff;
+        border-color: #99ccff;
+        }
+        .fill-example-container {
+        text-align: right; /* Aligns the button to the right */
+        }
+
         .trigger-hidden {
             display: none; /* Hides the trigger field initially */
         }
@@ -275,10 +300,16 @@
                     <a class="nav-link" href="{{ url_for('guide') }}">User Guide</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="https://2024.igem.wiki/tau-israel/software">Documentation</a>
+                    <a class="nav-link" href=https://2024.igem.wiki/tau-israel/software>Documentation</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="https://pypi.org/project/toegen/">PyPi Package</a>
+                    <a class="nav-link" href="https://gitlab.igem.org/protech-tau/software">ToREC Git</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://gitlab.igem.org/protech-tau/toegen">ToeGen Git</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href=https://pypi.org/project/toegen/>PyPi Package</a>
                 </li>
             </ul>
         </div>
@@ -290,6 +321,10 @@
             <img src="{{ url_for('static', filename='im/logo_torec.png') }}" alt="ToREC Logo" class="logo" width="500" height="220">
         </div>
         <form action="{{ url_for('user_data_getter') }}" method="POST" enctype="multipart/form-data" novalidate>
+            <div class="fill-example-container">
+          <button type="button" id="fill-example" class="btn btn-primary fill-example-btn">Fill Example</button>
+            </div>
+
             {{ input_form.hidden_tag() }}
             <!-- Email Field -->
             <div class="form-group">
@@ -306,7 +341,7 @@
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.target_seq.label }}
                 <span class="question-mark">?</span>
-                <span class="tooltiptext2">Enter the target gene RNA sequence to find the best trigger sequence for the toehold switch.</span>
+                <span class="tooltiptext2">Enter the target gene`s RNA Sequence, the software will automatically find the best window from it to serve as a trigger</span>
                 {{ input_form.target_seq(class="form-control" + (" is-invalid" if input_form.target_seq.errors else ""), placeholder="") }}
                 {% if input_form.target_seq.errors %}
                     <div class="invalid-feedback d-block">
@@ -319,7 +354,7 @@
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.cell_type.label }}
                 <span class="question-mark">?</span>
-                <span class="tooltiptext2">Select the organism type for optimized modeling.</span>
+                <span class="tooltiptext2">Select the organism type in which the expression occurs for optimized modeling.</span>
                 {{ input_form.cell_type(class="form-control" + (" is-invalid" if input_form.cell_type.errors else "")) }}
                 {% if input_form.cell_type.errors %}
                     <div class="invalid-feedback d-block">
@@ -353,7 +388,7 @@
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.reporter_gene.label }}
                 <span class="question-mark">?</span>
-                <span class="tooltiptext2">Specify the reporter gene for measurable gene expression output or pick option.</span>
+                <span class="tooltiptext2">Enter the DNA sequence of the reporter gene for measurable gene expression output, or leave blank to select from available options.</span>
                 {{ input_form.reporter_gene(class="form-control" + (" is-invalid" if input_form.reporter_gene.errors else ""), placeholder="") }}
                 {% if input_form.reporter_gene.errors %}
                     <div class="invalid-feedback d-block">
@@ -365,6 +400,8 @@
 
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.optional_reporter.label }}
+                <span class="question-mark">?</span>
+                <span class="tooltiptext2">If you do not have a specific reporter gene in mind, select one from the default options provided.</span>
                 {{ input_form.optional_reporter(class="form-control" + (" is-invalid" if input_form.optional_reporter.errors else "")) }}
                 {% if input_form.optional_reporter.errors %}
                     <div class="invalid-feedback d-block">
@@ -377,10 +414,10 @@
             <div class="form-group" data-toggle="tooltip">
                 {{ input_form.file.label }}
                 <span class="question-mark">?</span>
-
-                <span class="tooltiptext2">Supported formats: ".fasta", ".fa", ".fastq", ".gb", ".gbk", ".embl", ".phy", ".phylip", ".aln", ".nex", ".stockholm", ".tab", ".qual", ".abi", ".sff", ".xml" </span>
+                <span class="tooltiptext2">Leave empty for default transcripts file or upload a transcriptome file that includes all  RNA sequences which are present in the chosen organism.<br>
+                    Supported formats: ".fasta", ".fa", ".fastq", ".gb", ".gbk", ".embl", ".phy", ".phylip", ".aln", ".nex", ".stockholm", ".tab", ".qual", ".abi", ".sff", ".xml" </span>
                 <div class="file-drop-area">
-                    <span class="file-drop-message">Upload a transcriptome file for precise toehold design, or skip to use the default organism genome only.</span>
+                    <span class="file-drop-message">Drop transcripts files here or click the button to browse</span>
                     <input type="file" name="file" class="form-control-file">
                     {{ input_form.file(class="form-control-file" + (" is-invalid" if input_form.file.errors else "")) }}
                 </div>
@@ -390,19 +427,27 @@
                         {{ input_form.file.errors[0] }}
                     </div>
                 {% endif %}
-
-
             </div>
 
             <div class="submit-button-container">
                 {{ input_form.submit(class="btn btn-primary") }}
             </div>
         </form>
+
     </div>
-
-
-
-
+    <script>
+    document.getElementById('fill-example').addEventListener('click', function() {
+        document.getElementById("gene").value = 'CCCGCACCTGACAGTGCGGGCTTTTTTTTTCGACCAAAGGTAACGAGGTAACAACCATGCGAGTGTTGAAGTTCGGCGGTACATCAGTGGCAAATGCAGAACGTTTTCTGCGTGTTGCCGATATTCTGGAAAGCAATGCCAGGCAGGGGCAGGTGGCCACCGTCCTCTCTGCCCCCGCCAAAATCACCAACCACCTGGTGGCGATGATTGAAAAAACCATTAGCGGCCAGGATGCTTTACCCAATATCAGCGATGCCGAACGTATTTTTGCCGAACTTTTGACGGGACTCGCCGCCGCCCAGCCGGGGTTCCCGCTGGCGCAATTGAAAACTTTCGTCGATCAGGAATTT';
+        console.log('Gene field value set');
+        document.getElementById("reporter_gene").value = "AUGGUGAGCAAGGGCGAGGAGGACAACAUGGCCAUCAUCAAGGAGUUCAUGCGGUUCAAGGUGCACAUGGAGGGCAGCGUGAACGGCCACGAGUUCGAGAUCGAGGGCGAGGGCGAGGGCCGGCCCUACGAGGGCACCCAGACCGCCAAGCUGAAGGUGACCAAGGGCGGCCCCCUGCCCUUCGCCUGGGACAUCCUGAGCCCCCAGUUCAUGUACGGCAGCAAGGCCUACGUGAAGCACCCCGCCGACAUCCCCGACUACCUGAAGCUGAGCUUCCCCGAGGGCUUCAAGUGGGAGCGGGUGAUGAACUUCGAGGACGGCGGCGUGGUGACCGUGACCCAGGACAGCAGCCUGCAGGACGGCGAGUUCAUCUACAAGGUGAAGCUGCGGGGCACCAACUUCCCCAGCGACGGCCCCGUGAUGCAGAAGAAGACCAUGGGCUGGGAGGCCAGCAGCGAGCGGAUGUACCCCGAGGACGGCGCCCUGAAGGGCGAGAUCAAGCAGCGGCUGAAGCUGAAGGACGGCGGCCACUACGACGCCGAGGUGAAGACCACCUACAAGGCCAAGAAGCCCGUGCAGCUGCCCGGCGCCUACAACGUGAACAUCAAGCUGGACAUCACCAGCCACAACGAGGACUACACCAUCGUGGAGCAGUACGAGCGGGCCGAGGGCCGGCACAGCACCGGCGGCAUGGACGAGCUGUACAAGAGCGGCAACUGA";
+        document.getElementById('cell_type').value = 'E.coli';
+    });
+    </script>
+    <script>
+    document.querySelector('form').onsubmit = function() {
+        this.querySelector('button[type="submit"]').disabled = true;
+    }
+    </script>
 
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
