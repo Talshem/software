@@ -74,8 +74,19 @@ def validate_sequence(sequence):
     if not re.search(r"^[ACGUTactgu]", sequence):
         raise ValueError("Invalid sequence: must contain only A, C, G, or T, U , a ,c,t,g,u nucleotides.")
     return sequence
+
 def validate_sequence_bool(sequence):
-    return bool(re.fullmatch(r"[ACGUTacgut]+", sequence))
+    # Allows nucleotide sequences with multiple non-consecutive spaces in the middle, or leading/trailing spaces
+    return bool(re.fullmatch(r"\s*[ACGUTacgut]+(?:\s[ACGUTacgut]+)*\s*", sequence))
+
+def remove_single_spaces(sequence):
+    sequence = sequence.strip()
+    parts = sequence.split(' ')
+
+    if len(parts) > 1:
+        return ''.join(parts)
+    else:
+        return sequence
 
 
 def validate_trigger_length(form, field):
@@ -196,12 +207,16 @@ def user_data_getter():
     if input_form.validate_on_submit():
         try:
             email = input_form.email.data
-            if trigger:
+            if input_form.user_trigger_bool.data:
                 trigger = input_form.trigger.data.upper()
+                trigger = remove_single_spaces(trigger)
             else:
                 target_seq = input_form.target_seq.data.upper()
+                target_seq = remove_single_spaces(target_seq)
+
 
             reporter_gene = input_form.reporter_gene.data.upper()
+            reporter_gene = remove_single_spaces(reporter_gene)
             reporter_option = input_form.optional_reporter.data
             if reporter_option != 'None':
                 if reporter_gene == 'GFP':
@@ -247,8 +262,7 @@ def user_data_getter():
             input_form.user_trigger_bool.data = ''
             input_form.cell_type.data = ''
             input_form.file.data = ''
-
-            flash('Form submitted successfully. Job accepted.')
+            flash('Thank you for using ToREC! Form submitted successfully!')
         except Exception as e:
             flash(f"Error processing form: {e}")
 

@@ -22,8 +22,8 @@ from RNA import RNA
 from nupack import *
 config.threads = 8
 
-EDIT_DIST = 7
-TRIGGERS_BATCH = 15
+EDIT_DIST = 5
+TRIGGERS_BATCH = 20
 SWITCH_BATCH = 2
 
 
@@ -52,24 +52,26 @@ DATA_PATHS = {
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 def extract_top_homology_sequences(triggers_homology_mapping):
+    print(triggers_homology_mapping)
     homo_dfs = []
+
     for trigger_homology in triggers_homology_mapping:
         if trigger_homology:
             trigger_all_matches = []
             for gene_homology in trigger_homology:
-                # Check if gene_homology is a valid dictionary
                 if isinstance(gene_homology, dict):
                     trigger_all_matches.extend(gene_homology.values())
                 else:
                     continue
 
+            # If no matches are found, create an empty DataFrame
             if not trigger_all_matches or not trigger_all_matches[0]:
-                # If no matches are found, create an empty DataFrame
                 trig_res_df = pd.DataFrame(
                     columns=['distance', 'idx', 'sequence', 'gene', 'protein', 'homologous_trigger_mfe'])
             else:
                 matches_df = pd.DataFrame(trigger_all_matches[0])
 
+                # add competitor only MFE
                 mfe_dict = {'homologous_trigger_mfe': []}
                 for homos in trigger_all_matches[0]:
                     if 'sequence' in homos.keys():
@@ -79,6 +81,7 @@ def extract_top_homology_sequences(triggers_homology_mapping):
                     else:
                         mfe_dict['homologous_trigger_mfe'].append(None)
                 mfe_df = pd.DataFrame(mfe_dict)
+
                 trig_res_df = pd.concat([matches_df, mfe_df], axis=1)
         else:
             trig_res_df = pd.DataFrame(
@@ -86,6 +89,7 @@ def extract_top_homology_sequences(triggers_homology_mapping):
             )
 
         homo_dfs.append(trig_res_df)
+
 
     # Competition RRF calculation with valid checks
     higher = ['homologous_trigger_mfe']
@@ -121,7 +125,7 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
         transcripts_list = cell_type_transcripts
 
     # Get optional triggers
-    triggers_with_mfe_df = [[trigger, None]]
+    triggers_with_mfe_df = pd.DataFrame([trigger, None]).T.rename(columns={0: "Trigger", 1: "Trigger MFE Score"})
     n_switch = 1
     if user_trigger_boo == 'EMPTY':
         cell_window = 30 if cell_type == 'E.coli' else 23
@@ -144,15 +148,18 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     # Extract top homology sequences
     rrf_ranks = extract_top_homology_sequences(homo_res)
 
-    # Top (triggers, homology) -> switch design
+
+    # Take into account in the design the top competitors: (trigger, top competitor) -> switch design
     homology_sequences_final = [ranked_df['sequence'].iloc[0] if len(ranked_df) > 0 else None for ranked_df in rrf_ranks][:n_switch]
-    homology_sequences_final_score = [ranked_df['sequence_RRF'].iloc[0] if len(ranked_df) > 0 else None for ranked_df in rrf_ranks][:n_switch]
     triggers_sequences_final = triggers_sequences[:n_switch]
 
-    # Generate switches safely
+    homology_sequences_final_score = [ranked_df['sequence_RRF'].iloc[0] if len(ranked_df) > 0 else None for ranked_df in rrf_ranks][:n_switch]
+
+    # Generate switches
     switch_res = Parallel(n_jobs=4)(delayed(generate_switch)(f_trigger, f_top_homology_sequence, reporter_gene, cell_type)
                                     for f_trigger, f_top_homology_sequence in
                                     zip(triggers_sequences_final, homology_sequences_final))
+
     # Model Score
     regg_results = {'Switch': [], 'Fold Change Toehold Score': []}
     score_calculator = get_score_calc(cell_type)
@@ -168,13 +175,16 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     comp_df = pd.DataFrame(homology_sequences_final_score, columns=['Competition Score'])
     results = pd.concat([triggers_with_mfe_df.head(n_switch), regg_results_df, comp_df], axis=1)
 
+    scored_tot = results.copy()
     # RRF calculation- fold change toehold score, competition score, trigger mfe score
-    higher = ["Fold Change Toehold Score"]
-    lower = ["Trigger MFE Score", "Competition Score"]
-    scored_tot = RRF(results, higher, lower, index='Switch').rename(columns={"Switch_RRF": "Combined Score"})
+    if not user_trigger_boo:
+        higher = ["Fold Change Toehold Score"]
+        lower = ["Trigger MFE Score", "Competition Score"]
+        scored_tot = RRF(results, higher, lower, index='Switch').rename(columns={"Switch_RRF": "Combined Score"})
 
     # Prepare and send the report
     final_df = concat_tables(scored_tot, rrf_ranks[:n_switch])
+
     print(final_df.to_string())
     send(final_df, email)
     return
@@ -225,7 +235,7 @@ def RRF(ranking_df, higher_is_better_cols, lower_is_better_cols, index, k=60):
     if not isinstance(index, str):
         raise ValueError("'index' should be a string")
 
-    ranking_df = ranking_df.copy().reset_index(drop=True)
+    ranking_df = ranking_df.copy().reset_index()
     cols = list(ranking_df.columns)
 
 
@@ -242,6 +252,7 @@ def RRF(ranking_df, higher_is_better_cols, lower_is_better_cols, index, k=60):
         lambda row: sum(1 / (k + rank) for rank in row if pd.notna(rank)), axis=1)
 
     mask = cols + [f'{index}_RRF']
+
     return ranking_df[mask].sort_values(by=f'{index}_RRF', ascending=False)
 
 
@@ -255,7 +266,6 @@ def build_homology_map(trigger, seq, gene_name, protein_name):
         return []
 
     sequence_match_mapping = []
-
     try:
         # Find matches with error handling
         matches = find_near_matches(trigger, seq, max_insertions=0, max_deletions=0, max_l_dist=EDIT_DIST)
@@ -285,21 +295,9 @@ def build_homology_map(trigger, seq, gene_name, protein_name):
 
 
 def find_homology(sequence, genome_data):
-    # Validate inputs
-    if not isinstance(sequence, str) or not sequence:
-        logging.error("Invalid sequence provided for homology search.")
-        return []
-    if not isinstance(genome_data, list):
-        logging.error("Invalid genome data provided.")
-        return []
 
     genes_sub_sequences = []
     for gene_data_dict in genome_data:
-        # Validate the structure of genome data
-        if not all(key in gene_data_dict for key in ['sequence', 'gene', 'protein']):
-            logging.error("Missing keys in gene data: 'sequence', 'gene', 'protein'")
-            continue
-
         gene_sub_seqs = {}
         mRNA_seq = gene_data_dict.get('sequence', "")
         gene_name = gene_data_dict.get('gene', "")
@@ -344,37 +342,35 @@ def generate_switch(trigger, homologous_sequence, reporter_gene, cell_type):
 
 
 def concat_tables(df_results, rrf_ranks):
-    # Validate inputs
     combined_rows = []
     rrf_ranks = rrf_ranks.copy()
-    df_results['Fold Change Toehold Score'] = sorted(df_results['Fold Change Toehold Score'], reverse=True)
+
     if all([len(rrf_df) == 0 for rrf_df in rrf_ranks]):
         df_results['Competition Score'] = 'Competitor Not Found'
         return df_results
 
 
-    for index, row in df_results.iterrows():
-        combined_df = pd.concat([pd.DataFrame([row]), rrf_ranks[index]], axis=1, ignore_index=True)
-        print(combined_df.to_string())
+    for i, row in df_results.iterrows():
+        if 'index' in row:
+            index = int(row['index'])
+        else:
+            index = i
+
+        competitor_data_df = rrf_ranks[int(index)]
+        ranking_df = pd.DataFrame([row])
+        combined_df = pd.concat([ranking_df, competitor_data_df], axis=1)
         combined_rows.append(combined_df)
 
-    final_df = pd.concat(combined_rows, ignore_index=True).drop(columns=[12])
-    rename_dict = {
-        0: 'Trigger',
-        1: 'Trigger MFE Score',
-        2: 'Switch',
-        3: 'Fold Change Toehold Score',
-        4: 'Competition Score',
-        5: 'Combined Score',
-        6: 'Substitution Distance',
-        7: 'Competitor Location',
-        8: 'Competitor Sequence',
-        9: 'Competitor Gene',
-        10: 'Competitor Protein',
-        11: 'Competitor Trigger MFE'
-    }
 
-    # Rearrange the columns
+    final_df = pd.concat(combined_rows, ignore_index=True).drop(columns=['index', 'sequence_RRF'])
+    rename_dict = {
+        'distance': 'Substitution Distance',
+        'idx': 'Competitor Location',
+        'sequence': 'Competitor Sequence',
+        'gene': 'Competitor Gene',
+        'protein': 'Competitor Protein',
+        'homologous_trigger_mfe': 'Competitor Trigger MFE',
+    }
     final_df = final_df.rename(columns=rename_dict)
     return final_df
 

@@ -276,7 +276,6 @@
         .fill-example-container {
         text-align: right; /* Aligns the button to the right */
         }
-
         .trigger-hidden {
             display: none; /* Hides the trigger field initially */
         }
@@ -321,6 +320,17 @@
             <img src="{{ url_for('static', filename='im/logo_torec.png') }}" alt="ToREC Logo" class="logo" width="500" height="220">
         </div>
         <form action="{{ url_for('user_data_getter') }}" method="POST" enctype="multipart/form-data" novalidate>
+
+            <!-- Display flashed messages -->
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <div class="alert alert-success" role="alert">
+                      {{ messages[0] }}
+                    </div>
+                  {% endif %}
+                {% endwith %}
+
+
             <div class="fill-example-container">
           <button type="button" id="fill-example" class="btn btn-primary fill-example-btn">Fill Example</button>
             </div>
@@ -432,12 +442,13 @@
             <div class="submit-button-container">
                 {{ input_form.submit(class="btn btn-primary") }}
             </div>
+
         </form>
 
     </div>
     <script>
     document.getElementById('fill-example').addEventListener('click', function() {
-        document.getElementById("gene").value = 'CCCGCACCTGACAGTGCGGGCTTTTTTTTTCGACCAAAGGTAACGAGGTAACAACCATGCGAGTGTTGAAGTTCGGCGGTACATCAGTGGCAAATGCAGAACGTTTTCTGCGTGTTGCCGATATTCTGGAAAGCAATGCCAGGCAGGGGCAGGTGGCCACCGTCCTCTCTGCCCCCGCCAAAATCACCAACCACCTGGTGGCGATGATTGAAAAAACCATTAGCGGCCAGGATGCTTTACCCAATATCAGCGATGCCGAACGTATTTTTGCCGAACTTTTGACGGGACTCGCCGCCGCCCAGCCGGGGTTCCCGCTGGCGCAATTGAAAACTTTCGTCGATCAGGAATTT';
+        document.getElementById("gene").value = 'ATTACCACCACCATCACCATTACCACAGGTAACGGTGCGGGCTGACGCGTACAGGAAACACAGAAAAAAGCCCGCACCTGACAGTGCGGGCTTTTTTTTTCGACCAAAGGTAACGAGGTAACAACCATGCGAGTGTTGAAGTTCGGCGGTACATCAGTGGCAAATGCAGAACGTTTTCTGCGTGTTGCCGATATTCTGGAAAGCAATGCCAGGCAGGGGCAGGTGGCCACCGTCCTCTCTGCCCCCGCCAAAATCACCAACCACCTGGTGGCGATGATTG';
         console.log('Gene field value set');
         document.getElementById("reporter_gene").value = "AUGGUGAGCAAGGGCGAGGAGGACAACAUGGCCAUCAUCAAGGAGUUCAUGCGGUUCAAGGUGCACAUGGAGGGCAGCGUGAACGGCCACGAGUUCGAGAUCGAGGGCGAGGGCGAGGGCCGGCCCUACGAGGGCACCCAGACCGCCAAGCUGAAGGUGACCAAGGGCGGCCCCCUGCCCUUCGCCUGGGACAUCCUGAGCCCCCAGUUCAUGUACGGCAGCAAGGCCUACGUGAAGCACCCCGCCGACAUCCCCGACUACCUGAAGCUGAGCUUCCCCGAGGGCUUCAAGUGGGAGCGGGUGAUGAACUUCGAGGACGGCGGCGUGGUGACCGUGACCCAGGACAGCAGCCUGCAGGACGGCGAGUUCAUCUACAAGGUGAAGCUGCGGGGCACCAACUUCCCCAGCGACGGCCCCGUGAUGCAGAAGAAGACCAUGGGCUGGGAGGCCAGCAGCGAGCGGAUGUACCCCGAGGACGGCGCCCUGAAGGGCGAGAUCAAGCAGCGGCUGAAGCUGAAGGACGGCGGCCACUACGACGCCGAGGUGAAGACCACCUACAAGGCCAAGAAGCCCGUGCAGCUGCCCGGCGCCUACAACGUGAACAUCAAGCUGGACAUCACCAGCCACAACGAGGACUACACCAUCGUGGAGCAGUACGAGCGGGCCGAGGGCCGGCACAGCACCGGCGGCAUGGACGAGCUGUACAAGAGCGGCAACUGA";
         document.getElementById('cell_type').value = 'E.coli';
