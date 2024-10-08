@@ -237,10 +237,9 @@ def user_data_getter():
                 s_file_dict = "EMPTY"
 
 
-            subprocess.run(['python', 'tool/generate.py', s_email, s_target_seq, s_trigger, s_reporter_gene, s_cell_type,
-                            s_user_trigger_bool, s_file_dict],
-                           text=True)
-            print("Subprocess ran successfully")
+            subprocess.Popen(['python', 'tool/generate.py', s_email, s_target_seq, s_trigger, s_reporter_gene,
+                              s_cell_type, s_user_trigger_bool, s_file_dict], text=True)
+
             input_form.email.data = ''
             input_form.target_seq.data = ''
             input_form.trigger.data = ''

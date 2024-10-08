@@ -29,15 +29,15 @@ SWITCH_BATCH = 2
 
 model_path = "/workspace/tool/files/webtool_model.txt"
 feature_path = "/workspace/tool/files/model_features.txt"
-
 E_COLI_DATA_PATH = "Escherichia_coli_ASM886v2.pkl"
 HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
 YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
 
 
+
 # for development
-# model_path = "/Users/netanelerlich/Desktop/IGEM/webtool_model.txt"
-# feature_path = "/Users/netanelerlich/Desktop/IGEM/model_features.txt"
+# model_path = "/Users/netanelerlich/Desktop/Semester things/IGEM/webtool_model.txt"
+# feature_path = "/Users/netanelerlich/Desktop/Semester things/IGEM/model_features.txt"
 # E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
 # HUMAN_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Homo_sapiens_GRCh38.pkl"
 # YEAST_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Saccharomyces_cerevisiae_S288C.pkl"
@@ -110,7 +110,7 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
 
 
     # with open(blob_name, 'rb') as f:
-    #     cell_type_transcripts = pickle.load(f)
+    #      cell_type_transcripts = pickle.load(f)
 
 
     # Update transcripts_list
@@ -347,6 +347,7 @@ def concat_tables(df_results, rrf_ranks):
     # Validate inputs
     combined_rows = []
     rrf_ranks = rrf_ranks.copy()
+    df_results['Fold Change Toehold Score'] = sorted(df_results['Fold Change Toehold Score'], reverse=True)
     if all([len(rrf_df) == 0 for rrf_df in rrf_ranks]):
         df_results['Competition Score'] = 'Competitor Not Found'
         return df_results
@@ -354,6 +355,7 @@ def concat_tables(df_results, rrf_ranks):
 
     for index, row in df_results.iterrows():
         combined_df = pd.concat([pd.DataFrame([row]), rrf_ranks[index]], axis=1, ignore_index=True)
+        print(combined_df.to_string())
         combined_rows.append(combined_df)
 
     final_df = pd.concat(combined_rows, ignore_index=True).drop(columns=[12])
@@ -388,8 +390,8 @@ if __name__ == '__main__':
     s_user_trigger_boo = sys.argv[6]
     s_transcripts_list = sys.argv[7]
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
-    # for development generate inputs
 
+    # for development generate inputs
     """
     s_mail = 'erlichnet57@gmail.com'
     s_target_seq = "TAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGATAGTAGAATAGTAAGATAGAT"
@@ -401,6 +403,7 @@ if __name__ == '__main__':
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
     """
 
-    # with open(YEAST_DATA_PATH,'rb') as f:
+
+    # with open(E_COLI_DATA_PATH, 'rb') as f:
     #     cell_type_transcripts = pickle.load(f)
-    # print(cell_type_transcripts[0])
+    #     print(cell_type_transcripts[3])
