@@ -95,6 +95,7 @@ def extract_top_homology_sequences(triggers_homology_mapping):
 
 
 def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigger_boo, transcripts_list):
+    logging.info('in_route_input')
     # Basic input validation
     if not isinstance(email, str) or "@" not in email:
         raise ValueError("Invalid email provided")
@@ -188,13 +189,12 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     # for df in rrf_ranks:
     #     print(df.to_string())
 
-
-
     # Prepare and send the report
     final_df = concat_tables(scored_tot, rrf_ranks[:n_switch])
 
     # print('final df')
     # print(final_df.to_string())
+    print(final_df)
     send(final_df, email)
     return
 

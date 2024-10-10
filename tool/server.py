@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import json
+import logging
 from flask_wtf import FlaskForm, CSRFProtect
 from wtforms.validators import DataRequired
 from flask import Flask, render_template, flash, request
@@ -254,6 +255,8 @@ def user_data_getter():
 
             subprocess.Popen(['python', 'tool/generate.py', s_email, s_target_seq, s_trigger, s_reporter_gene,
                               s_cell_type, s_user_trigger_bool, s_file_dict], text=True)
+
+            logging.info('Form submitted successfully')
 
             input_form.email.data = ''
             input_form.target_seq.data = ''
