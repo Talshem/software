@@ -4,7 +4,7 @@ from prokaryotic_switch_generator import ProkaryoticSwitchGenerator
 from window_folding_based_selection import get_gene_top_ranked_windows
 from utils.send_mail import send_email_with_attachment as send
 from eukaryotic_score_calculator import EukaryoticScoreCalculator
-#from server import bucket
+from server import bucket
 
 import json
 import pickle
@@ -27,20 +27,20 @@ EDIT_DIST = 6
 TRIGGERS_BATCH = 15
 SWITCH_BATCH = 4
 
-# model_path = "/workspace/tool/files/webtool_model.txt"
-# feature_path = "/workspace/tool/files/model_features.txt"
-# E_COLI_DATA_PATH = "Escherichia_coli_ASM886v2.pkl"
-# HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
-# YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
+model_path = "/workspace/tool/files/webtool_model.txt"
+feature_path = "/workspace/tool/files/model_features.txt"
+E_COLI_DATA_PATH = "Escherichia_coli_ASM886v2.pkl"
+HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
+YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
 
 
 
 # for development
-model_path = "/Users/netanelerlich/Desktop/Semester things/IGEM/webtool_model.txt"
-feature_path = "/Users/netanelerlich/Desktop/Semester things/IGEM/model_features.txt"
-E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
-HUMAN_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Homo_sapiens_GRCh38.pkl"
-YEAST_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Saccharomyces_cerevisiae_S288C.pkl"
+# model_path = "/Users/netanelerlich/Desktop/Semester things/IGEM/webtool_model.txt"
+# feature_path = "/Users/netanelerlich/Desktop/Semester things/IGEM/model_features.txt"
+# E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
+# HUMAN_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Homo_sapiens_GRCh38.pkl"
+# YEAST_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Saccharomyces_cerevisiae_S288C.pkl"
 
 
 DATA_PATHS = {
@@ -102,14 +102,14 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
 
 
     blob_name = DATA_PATHS.get(cell_type)
-    # blob = bucket.blob(blob_name)
-    # bytes_data = blob.download_as_bytes()
-    # file_like_obj = io.BytesIO(bytes_data)
-    # cell_type_transcripts = pickle.load(file_like_obj)
+    blob = bucket.blob(blob_name)
+    bytes_data = blob.download_as_bytes()
+    file_like_obj = io.BytesIO(bytes_data)
+    cell_type_transcripts = pickle.load(file_like_obj)
 
 
-    with open(blob_name, 'rb') as f:
-         cell_type_transcripts = pickle.load(f)
+    # with open(blob_name, 'rb') as f:
+    #      cell_type_transcripts = pickle.load(f)
 
 
     # Update transcripts_list
@@ -120,7 +120,6 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
         transcripts_list = cell_type_transcripts
 
     # Get optional triggers
-
     triggers_with_mfe_df = pd.DataFrame([trigger, None]).T.rename(columns={0: "Trigger", 1: "Trigger MFE Score"})
     n_switch = 1
     if user_trigger_boo == 'EMPTY':
@@ -144,11 +143,9 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     # Extract top homology sequences
     rrf_ranks = extract_top_homology_sequences(homo_res)
 
-
     # Take into account in the design the top competitors: (trigger, top competitor) -> switch design
     homology_sequences_final = [ranked_df['sequence'].iloc[0] if len(ranked_df) > 0 else None for ranked_df in rrf_ranks][:n_switch]
     triggers_sequences_final = triggers_sequences[:n_switch]
-
 
     # Generate switches
     switch_res = Parallel(n_jobs=4)(delayed(generate_switch)(f_trigger, f_top_homology_sequence, reporter_gene, cell_type)
@@ -171,30 +168,16 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     comp_df = pd.DataFrame(homology_sequences_final_score, columns=['Competition Score'])
     results = pd.concat([triggers_with_mfe_df.head(n_switch), regg_results_df, comp_df], axis=1)
 
-
-
     scored_tot = results.copy()
     # RRF calculation- fold change toehold score, competition score, trigger mfe score
     if user_trigger_boo == 'EMPTY':
         higher = ["Fold Change Toehold Score"]
         lower = ["Trigger MFE Score", "Competition Score"]
-        # print('before ranking')
-        # print(results.to_string())
         scored_tot = RRF(results, higher, lower, index='Switch').rename(columns={"Switch_RRF": "Combined Score"})
-
-        # print('after ranking')
-        # print(scored_tot.to_string())
-
-    # print('homology data')
-    # for df in rrf_ranks:
-    #     print(df.to_string())
 
     # Prepare and send the report
     final_df = concat_tables(scored_tot, rrf_ranks[:n_switch])
-
-    # print('final df')
-    # print(final_df.to_string())
-    
+    print(final_df.to_string())
     send(final_df, email)
     return
 
@@ -391,7 +374,6 @@ def concat_tables(df_results, rrf_ranks):
 
 if __name__ == '__main__':
     # Get the arguments from the user form.
-
     s_mail = sys.argv[1]
     s_target_seq = sys.argv[2]
     s_trigger = sys.argv[3]
@@ -399,6 +381,7 @@ if __name__ == '__main__':
     s_cell_type = sys.argv[5]
     s_user_trigger_boo = sys.argv[6]
     s_transcripts_list = sys.argv[7]
+    print(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo)
     route_input(s_mail, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_boo, s_transcripts_list)
 
     # for development generate inputs

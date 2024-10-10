@@ -11,13 +11,13 @@ from RNA import RNA
 from nupack import *
 
 
-sys.path.insert(1, '/Users/netanelerlich/Desktop/Semester things/IGEM/PyFeat-master/Codes')
-RNACOFOLD_BINARY_NAME = '/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAcofold'
-RNAUP_BINARY_NAME = "/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAup"
+# sys.path.insert(1, '/Users/netanelerlich/Desktop/Semester things/IGEM/PyFeat-master/Codes')
+# RNACOFOLD_BINARY_NAME = '/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAcofold'
+# RNAUP_BINARY_NAME = "/Users/netanelerlich/ViennaRNA-2.6.4/src/bin/RNAup"
 
-# sys.path.insert(1, '/workspace/PyFeat-master/Codes')
-# RNACOFOLD_BINARY_NAME = '/workspace/miniconda3/envs/myenv/bin/RNAcofold'
-# RNAUP_BINARY_NAME = "/workspace/miniconda3/envs/myenv/bin/RNAup"
+sys.path.insert(1, '/workspace/PyFeat-master/Codes')
+RNACOFOLD_BINARY_NAME = '/workspace/miniconda3/envs/myenv/bin/RNAcofold'
+RNAUP_BINARY_NAME = "/workspace/miniconda3/envs/myenv/bin/RNAup"
 
 import generateFeatures
 config.threads = 4
