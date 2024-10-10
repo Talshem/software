@@ -23,11 +23,9 @@ from nupack import *
 config.threads = 8
 
 
-EDIT_DIST = 7
+EDIT_DIST = 6
 TRIGGERS_BATCH = 15
-
-SWITCH_BATCH = 2
-
+SWITCH_BATCH = 4
 
 model_path = "/workspace/tool/files/webtool_model.txt"
 feature_path = "/workspace/tool/files/model_features.txt"
@@ -54,10 +52,6 @@ DATA_PATHS = {
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 def extract_top_homology_sequences(triggers_homology_mapping):
-
-    print(triggers_homology_mapping)
-    homo_dfs = []
-
 
     homo_dfs = []
 
@@ -154,7 +148,6 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     homology_sequences_final = [ranked_df['sequence'].iloc[0] if len(ranked_df) > 0 else None for ranked_df in rrf_ranks][:n_switch]
     triggers_sequences_final = triggers_sequences[:n_switch]
 
-    homology_sequences_final_score = [ranked_df['sequence_RRF'].iloc[0] if len(ranked_df) > 0 else None for ranked_df in rrf_ranks][:n_switch]
 
     # Generate switches
     switch_res = Parallel(n_jobs=4)(delayed(generate_switch)(f_trigger, f_top_homology_sequence, reporter_gene, cell_type)
@@ -173,20 +166,35 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
     regg_results_df = pd.DataFrame(regg_results)
 
     # Organize
+    homology_sequences_final_score = [ranked_df['sequence_RRF'].iloc[0] if len(ranked_df) > 0 else None for ranked_df in rrf_ranks][:n_switch]
     comp_df = pd.DataFrame(homology_sequences_final_score, columns=['Competition Score'])
     results = pd.concat([triggers_with_mfe_df.head(n_switch), regg_results_df, comp_df], axis=1)
 
+
+
     scored_tot = results.copy()
     # RRF calculation- fold change toehold score, competition score, trigger mfe score
-    if not user_trigger_boo:
+    if user_trigger_boo == 'EMPTY':
         higher = ["Fold Change Toehold Score"]
         lower = ["Trigger MFE Score", "Competition Score"]
+        # print('before ranking')
+        # print(results.to_string())
         scored_tot = RRF(results, higher, lower, index='Switch').rename(columns={"Switch_RRF": "Combined Score"})
+
+        # print('after ranking')
+        # print(scored_tot.to_string())
+
+    # print('homology data')
+    # for df in rrf_ranks:
+    #     print(df.to_string())
+
+
 
     # Prepare and send the report
     final_df = concat_tables(scored_tot, rrf_ranks[:n_switch])
 
-    print(final_df.to_string())
+    # print('final df')
+    # print(final_df.to_string())
     send(final_df, email)
     return
 
@@ -349,6 +357,7 @@ def concat_tables(df_results, rrf_ranks):
     combined_rows = []
     rrf_ranks = rrf_ranks.copy()
 
+
     if all([len(rrf_df) == 0 for rrf_df in rrf_ranks]):
         df_results['Competition Score'] = 'Competitor Not Found'
         return df_results
@@ -381,6 +390,7 @@ def concat_tables(df_results, rrf_ranks):
 
 if __name__ == '__main__':
     # Get the arguments from the user form.
+
     s_mail = sys.argv[1]
     s_target_seq = sys.argv[2]
     s_trigger = sys.argv[3]
