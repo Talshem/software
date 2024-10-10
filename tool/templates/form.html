@@ -281,6 +281,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar">
@@ -320,6 +321,8 @@
             <img src="{{ url_for('static', filename='im/logo_torec.png') }}" alt="ToREC Logo" class="logo" width="500" height="220">
         </div>
         <form action="{{ url_for('user_data_getter') }}" method="POST" enctype="multipart/form-data" novalidate>
+            {{ input_form.hidden_tag() }}
+
 
 
             <!-- Display flashed messages -->
@@ -335,7 +338,6 @@
           <button type="button" id="fill-example" class="btn btn-primary fill-example-btn">Fill Example</button>
             </div>
 
-            {{ input_form.hidden_tag() }}
             <!-- Email Field -->
             <div class="form-group">
                 {{ input_form.email.label }}

@@ -22,7 +22,7 @@ csrf.init_app(app)
 
 app.config['SECRET_KEY'] = 'shaniqua'
 app.config['MAX_CONTENT_LENGTH'] = 210 * 1024 * 1024  # 210 MB
-app.config['UPLOAD_EXTENSIONS'] = ['.fasta']
+
 
 client = storage.Client()
 bucket_name = 'protech_bucket'
@@ -253,8 +253,8 @@ def user_data_getter():
 
 
             print(s_email, s_target_seq, s_trigger, s_reporter_gene, s_cell_type, s_user_trigger_bool)
-            subprocess.Popen(['python', 'tool/generate.py', s_email, s_target_seq, s_trigger, s_reporter_gene,
-                              s_cell_type, s_user_trigger_bool, s_file_dict], text=True)
+            subprocess.run(['python3', 'tool/generate.py', s_email, s_target_seq, s_trigger, s_reporter_gene,
+                            s_cell_type, s_user_trigger_bool, s_file_dict], text=True)
             logging.info('Form submitted successfully')
 
             input_form.email.data = ''
@@ -264,13 +264,11 @@ def user_data_getter():
             input_form.user_trigger_bool.data = ''
             input_form.cell_type.data = ''
             input_form.file.data = ''
-
             flash('Thank you for using ToREC! Form submitted successfully!')
         except Exception as e:
             flash(f"Error processing form: {e}")
 
     return render_template('form.html', input_form=input_form)
-
 
 
 # Error Handling
