@@ -4,7 +4,7 @@ from prokaryotic_switch_generator import ProkaryoticSwitchGenerator
 from window_folding_based_selection import get_gene_top_ranked_windows
 from utils.send_mail import send_email_with_attachment as send
 from eukaryotic_score_calculator import EukaryoticScoreCalculator
-from server import bucket
+#from server import bucket
 
 import json
 import pickle
@@ -27,20 +27,20 @@ EDIT_DIST = 6
 TRIGGERS_BATCH = 15
 SWITCH_BATCH = 4
 
-model_path = "/workspace/tool/files/webtool_model.txt"
-feature_path = "/workspace/tool/files/model_features.txt"
-E_COLI_DATA_PATH = "Escherichia_coli_ASM886v2.pkl"
-HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
-YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
+# model_path = "/workspace/tool/files/webtool_model.txt"
+# feature_path = "/workspace/tool/files/model_features.txt"
+# E_COLI_DATA_PATH = "Escherichia_coli_ASM886v2.pkl"
+# HUMAN_DATA_PATH = "Homo_sapiens_GRCh38.pkl"
+# YEAST_DATA_PATH = "Saccharomyces_cerevisiae_S288C.pkl"
 
 
 
 # for development
-# model_path = "/Users/netanelerlich/Desktop/Semester things/IGEM/webtool_model.txt"
-# feature_path = "/Users/netanelerlich/Desktop/Semester things/IGEM/model_features.txt"
-# E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
-# HUMAN_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Homo_sapiens_GRCh38.pkl"
-# YEAST_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Saccharomyces_cerevisiae_S288C.pkl"
+model_path = "/Users/netanelerlich/Desktop/Semester things/IGEM/webtool_model.txt"
+feature_path = "/Users/netanelerlich/Desktop/Semester things/IGEM/model_features.txt"
+E_COLI_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Escherichia_coli_ASM886v2.pkl"
+HUMAN_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Homo_sapiens_GRCh38.pkl"
+YEAST_DATA_PATH = "/Users/netanelerlich/PycharmProjects/software/data/Saccharomyces_cerevisiae_S288C.pkl"
 
 
 DATA_PATHS = {
@@ -102,14 +102,14 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
 
 
     blob_name = DATA_PATHS.get(cell_type)
-    blob = bucket.blob(blob_name)
-    bytes_data = blob.download_as_bytes()
-    file_like_obj = io.BytesIO(bytes_data)
-    cell_type_transcripts = pickle.load(file_like_obj)
+    # blob = bucket.blob(blob_name)
+    # bytes_data = blob.download_as_bytes()
+    # file_like_obj = io.BytesIO(bytes_data)
+    # cell_type_transcripts = pickle.load(file_like_obj)
 
 
-    # with open(blob_name, 'rb') as f:
-    #      cell_type_transcripts = pickle.load(f)
+    with open(blob_name, 'rb') as f:
+         cell_type_transcripts = pickle.load(f)
 
 
     # Update transcripts_list
@@ -194,7 +194,7 @@ def route_input(email, target_seq, trigger, reporter_gene, cell_type, user_trigg
 
     # print('final df')
     # print(final_df.to_string())
-    print(final_df)
+    
     send(final_df, email)
     return
 
@@ -357,10 +357,11 @@ def concat_tables(df_results, rrf_ranks):
     combined_rows = []
     rrf_ranks = rrf_ranks.copy()
 
-
     if all([len(rrf_df) == 0 for rrf_df in rrf_ranks]):
         df_results['Competition Score'] = 'Competitor Not Found'
         return df_results
+
+
 
     for i, row in df_results.iterrows():
         if 'index' in row:
@@ -368,13 +369,13 @@ def concat_tables(df_results, rrf_ranks):
         else:
             index = i
 
-        competitor_data_df = rrf_ranks[int(index)]
-        ranking_df = pd.DataFrame([row])
-        combined_df = pd.concat([ranking_df, competitor_data_df], axis=1)
+        competitor_data_df = rrf_ranks[int(index)].reset_index(drop=True)
+        ranking_df = pd.DataFrame([row]).reset_index(drop=True)
+        combined_df = pd.merge(ranking_df, competitor_data_df, left_index=True, right_index=True, how='inner')
         combined_rows.append(combined_df)
 
 
-    final_df = pd.concat(combined_rows, ignore_index=True).drop(columns=['index', 'sequence_RRF'])
+    final_df = pd.concat(combined_rows, ignore_index=True).drop(columns=['index_x', 'index_y', 'sequence_RRF'])
     rename_dict = {
         'distance': 'Substitution Distance',
         'idx': 'Competitor Location',
