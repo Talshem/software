@@ -279,6 +279,21 @@
         .trigger-hidden {
             display: none; /* Hides the trigger field initially */
         }
+        .spinner {
+            display: none;
+            margin: 20px auto;
+            width: 50px;
+            height: 50px;
+            border: 5px solid lightgray;
+            border-top: 5px solid blue;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
@@ -448,6 +463,17 @@
         </form>
 
     </div>
+
+
+     <div class="spinner" id="loadingSpinner"></div>
+
+    <script>
+        // JavaScript to show the spinner when the form is submitted
+        document.getElementById('calcForm').onsubmit = function() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        };
+    </script>
+
     <script>
     document.getElementById('fill-example').addEventListener('click', function() {
 
@@ -614,6 +640,7 @@
     </script>
 
 </body>
+
 
 </html>
 
