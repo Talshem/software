@@ -7,8 +7,6 @@ from typing import List, Tuple
 import time
 from ViennaRNA import RNA
 
-## Hello World 
-
 config.threads = 8
 
 KOZAK_SEQUENCE = "ACCAAAAUG"
